@@ -1,5 +1,5 @@
 #torrent-finder  
-依赖JDK8,Maven是为了方便打包  
+只需要JDK8以上版本即可运行,使用Maven是为了方便打包;  
 实现协议:  
 http://www.bittorrent.org/beps/bep_0005.html  
 http://www.bittorrent.org/beps/bep_0009.html  
