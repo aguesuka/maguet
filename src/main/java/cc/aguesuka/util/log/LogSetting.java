@@ -1,9 +1,7 @@
 package cc.aguesuka.util.log;
 
-import cc.aguesuka.util.inject.Injector;
 import cc.aguesuka.util.inject.annotation.Config;
 import cc.aguesuka.util.inject.annotation.Init;
-import cc.aguesuka.util.inject.help.InjectorException;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -19,7 +17,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
- * set jdk logging properties file as customize file in resources dir
+ * 使用jdk自带的日志
  *
  * @author :yangmingyuxing
  * 2019/7/24 21:51
@@ -57,7 +55,7 @@ public class LogSetting {
     private void init() throws IOException {
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(logSettingFile)) {
 
-            if(inputStream == null){
+            if (inputStream == null) {
                 throw new NullPointerException("日志文件加载失败");
             }
             InputStream buff = new BufferedInputStream(inputStream);

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 /**
+ * 从指定地址下载指定种子文件
+ *
  * @author :yangmingyuxing
  * 2019/7/14 22:46
  */

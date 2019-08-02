@@ -40,11 +40,23 @@ public class Injector implements AutoCloseable {
     private Map<Class<?>, Object> typeMap = new HashMap<>();
     private Set<Class<?>> repeatSet = new HashSet<>();
 
+    /**
+     * 添加依赖的类
+     *
+     * @param classes 依赖的类
+     * @return this
+     */
     public Injector addClass(Class<?>... classes) {
         resources.addAll(Arrays.asList(classes));
         return this;
     }
 
+    /**
+     * 添加配置文件
+     *
+     * @param path 配置文件路径,以classpath开始的相对路径
+     * @return this
+     */
     public Injector addProperties(String path) {
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(path)) {
             Objects.requireNonNull(inputStream);
@@ -55,6 +67,11 @@ public class Injector implements AutoCloseable {
         return this;
     }
 
+    /**
+     * 注入对象并执行初始化方法
+     *
+     * @return this
+     */
     public Injector build() {
         List<Object> instanceList = new ArrayList<>();
         for (Class<?> c : resources) {
@@ -72,6 +89,13 @@ public class Injector implements AutoCloseable {
         return this;
     }
 
+    /**
+     * 根据类获得实例
+     *
+     * @param clazz class
+     * @param <T>   类的类型
+     * @return 类的实例
+     */
     @SuppressWarnings("unchecked")
     public <T> T instanceByClass(Class<T> clazz) {
         Object o = typeMap.get(clazz);
@@ -79,6 +103,14 @@ public class Injector implements AutoCloseable {
         return (T) o;
     }
 
+    /**
+     * 根据名称获得实例
+     *
+     * @param name 对象名称
+     * @param <T>  对象类型
+     * @return 对象实例
+     * @see Inject#value()
+     */
     @SuppressWarnings("unchecked")
     public <T> T instanceByName(String name) {
         Object o = nameMap.get(name);
@@ -157,7 +189,7 @@ public class Injector implements AutoCloseable {
             Object afterCast = ClassUtil.typeCast(value, field.getType());
             field.set(instance, afterCast);
         } catch (IllegalAccessException | NullPointerException e) {
-            throw new InjectorException("设置配置文件失败:"+instance.getClass()+":"+annotation.value(),e);
+            throw new InjectorException("设置配置文件失败:" + instance.getClass() + ":" + annotation.value(), e);
         }
     }
 
@@ -176,11 +208,16 @@ public class Injector implements AutoCloseable {
         }
     }
 
+    /**
+     * 关闭容器中的需要关闭的对象
+     *
+     * @throws Exception 关闭时出现的异常
+     */
     @Override
     public void close() throws Exception {
         for (Class<?> resource : resources) {
             Object o = typeMap.get(resource);
-            if(o instanceof AutoCloseable){
+            if (o instanceof AutoCloseable) {
                 ((AutoCloseable) o).close();
             }
         }

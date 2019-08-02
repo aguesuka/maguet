@@ -1,6 +1,8 @@
 package cc.aguesuka.downloader;
 
 /**
+ * 根据info hash下载种子文件并保存
+ *
  * @author :yangmingyuxing
  * 2019/7/25 10:56
  */

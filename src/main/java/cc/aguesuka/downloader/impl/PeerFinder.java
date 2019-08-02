@@ -35,14 +35,29 @@ public class PeerFinder implements IPeerFinder {
     private DhtAction dhtAction;
     @Inject
     private Bucket<BencodeByteArray, InetSocketAddress> bucket;
+    /**
+     * 第一次访问从桶中获得地址的数量
+     */
     @Config("dhtAction.getPeerCount")
     private int initVisitCount;
+    /**
+     * dht中查询的线程数
+     */
     @Config("PeerFinder.thread.count")
     private int threadCount;
+    /**
+     * 下载种子的线程数
+     */
     @Config("PeerFinder.downloadThread")
     private int downloadThreadCount;
+    /**
+     * 下载种子的超时时间
+     */
     @Config("PeerFinder.getPeerTimeout")
     private int getPeerTimeout;
+    /**
+     * dht访问的最大节点数量,超过则抛出异常
+     */
     @Config("PeerFinder.maxVisitCount")
     private int maxVisitCount;
 
@@ -51,17 +66,40 @@ public class PeerFinder implements IPeerFinder {
         return new DoFinder(this, infoHash, metaDataDownloader).doFind();
     }
 
+    /**
+     * 内部类,一次任务对应一个类
+     */
     private static class DoFinder {
+
         private static final byte[] EMPTY_ARRAY = new byte[0];
-        volatile Set<InetSocketAddress> waitToVisit = Collections.newSetFromMap(new ConcurrentHashMap<>());
-        volatile Set<InetSocketAddress> hasVisit = Collections.newSetFromMap(new ConcurrentHashMap<>());
-        volatile Set<InetSocketAddress> hasGetPeer = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        /**
+         * 下一轮需要访问的dht节点
+         */
+        Set<InetSocketAddress> waitToVisit = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        /**
+         * 已经访问过的dht节点
+         */
+        Set<InetSocketAddress> hasVisit = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        /**
+         * 已经访问过的种子节点
+         */
+        Set<InetSocketAddress> hasGetPeer = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        /**
+         * 该次任务是否已经结束
+         */
         boolean isShutDown;
         private Logger logger = Logger.getLogger(LogSetting.DEFAULT_NAME);
         private PeerFinder config;
         private byte[] infoHash;
         private IMetaDataDownloader metaDataDownloader;
+        /**
+         * 获得种子地址任务的线程池
+         */
         private ForkJoinPool forkJoinPool;
+
+        /**
+         * 下载种子任务的线程池
+         */
         private ForkJoinPool downloadForkJoinPool;
 
         private DoFinder(PeerFinder config, byte[] infoHash, IMetaDataDownloader metaDataDownloader) {
@@ -73,6 +111,11 @@ public class PeerFinder implements IPeerFinder {
             isShutDown = false;
         }
 
+        /**
+         * 处理返回内容的NODES信息,如果返回的节点未访问过,添加到下一轮访问
+         *
+         * @param response get_peers 的返回内容
+         */
         void dealNodes(BencodeMap response) {
             try {
                 BencodeMap r = response.getBencodeMap(R);
@@ -93,6 +136,11 @@ public class PeerFinder implements IPeerFinder {
             }
         }
 
+        /**
+         * 判断是否应该结束
+         *
+         * @return 是否应该结束本次任务
+         */
         boolean shouldShutDown() {
             if (hasVisit.size() >= config.maxVisitCount) {
                 return true;
@@ -100,17 +148,21 @@ public class PeerFinder implements IPeerFinder {
             return isShutDown;
         }
 
+        /**
+         * 访问某dht节点,发送getPeer请求,如果返回有种子的节点,尝试下载
+         *
+         * @param address dht节点地址
+         * @return 下载种子成功, 返回非空数组, 里面是种子的Info信息;中断时,返回空数组;没有找到,返回null
+         */
         byte[] getInfoHashFromAddress(InetSocketAddress address) {
             if (shouldShutDown()) {
                 return EMPTY_ARRAY;
             }
             try {
-
+                hasVisit.add(address);
                 BencodeMap response = config.dhtAction.getPeers(infoHash, address, Timeout.getMilliSecond(config.getPeerTimeout));
                 dealNodes(response);
-                byte[] result = dealValues(response);
-                hasVisit.add(address);
-                return result;
+                return dealValues(response);
             } catch (SocketTimeoutException e) {
                 logger.log(Level.FINE, address + " 连接超时");
             } catch (Exception e) {
@@ -134,8 +186,8 @@ public class PeerFinder implements IPeerFinder {
                                     hasGetPeer.add(addr);
                                     return metaDataDownloader.downloadMataData(infoHash, addr);
                                 } catch (Exception e) {
-                                    logger.log(Level.WARNING, addr + " 下载失败 " + e.getMessage(),e);
-                                    return null;
+                                    logger.log(Level.WARNING, addr + " 下载失败 " + e.getMessage(), e);
+                                    return shouldShutDown() ? EMPTY_ARRAY : null;
                                 }
                             }
                     )
@@ -170,6 +222,7 @@ public class PeerFinder implements IPeerFinder {
                 Optional<byte[]> submit = forkJoinPool.submit(
                         () -> addressHashSet.parallelStream()
                                 .map(this::getInfoHashFromAddress)
+                                // 只有在非空的时候提前结束 如果数组为空,代表未下载种子但是 shouldShutDown()返回了true
                                 .filter(Objects::nonNull)
                                 .findAny()).get();
                 if (submit.isPresent()) {

@@ -8,6 +8,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
+ * http://www.bittorrent.org/beps/bep_0003.html#bencoding
+ * bencode是bittorrent协议的常用编码,消息和种子文件中都有用到.
+ * 本类提供将IBencode对象和byte数组的互相转换
+ * {@link Bencode#toBytes(IBencode)}
+ * {@link Bencode#parse(ByteBuffer)}
+ * <p>
+ * bencode 有四种类型
+ * Integer 整数 {@link BencodeInteger}
+ * String 对应Java中的byte[]而非字符串; {@link BencodeByteArray} 字符串可以转为BencodeByteArray反之则不一定
+ * List {@link BencodeList}
+ * Map {@link BencodeMap}
+ *
  * @author :yangmingyuxing
  * 2019/6/26 17:47
  */
