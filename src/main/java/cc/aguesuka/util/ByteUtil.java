@@ -61,8 +61,15 @@ public final class ByteUtil {
         return true;
     }
 
+    /**
+     * byte数组转int
+     *
+     * @param bytesOfLength4 长度为4的byte数组
+     * @return int 值
+     */
     public static int intValue(byte[] bytesOfLength4) {
-        if (bytesOfLength4.length != 4) {
+        final int intLength = 4;
+        if (bytesOfLength4.length != intLength) {
             throw new IllegalArgumentException();
         }
         return new BigInteger(bytesOfLength4).intValue();

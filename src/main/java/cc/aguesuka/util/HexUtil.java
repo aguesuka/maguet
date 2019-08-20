@@ -3,7 +3,7 @@ package cc.aguesuka.util;
 import java.util.Objects;
 
 /**
- * 十六进制工具类
+ * 十六进制工具类 oracle jdk 有,open jdk 需要自己写
  *
  * @author :yangmingyuxing
  * 2019/7/11 23:25
