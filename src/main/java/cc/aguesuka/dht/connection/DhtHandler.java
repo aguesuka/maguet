@@ -64,7 +64,7 @@ public class DhtHandler {
                     onPing(inetSocketAddress);
                     break;
                 case ANNOUNCE_PEER:
-                    onAnnouncePeer(inetSocketAddress);
+                    onAnnouncePeer(inetSocketAddress, data);
                     break;
                 default:
                     throw new RuntimeException("token error");
@@ -93,43 +93,45 @@ public class DhtHandler {
         return outputStream.toByteArray();
     }
 
-    private void sendTo(InetSocketAddress InetSocketAddress, BencodeMap data) throws IOException {
-        publisher.send(InetSocketAddress, data);
+    private void sendTo(InetSocketAddress inetSocketAddress, BencodeMap data) throws IOException {
+        publisher.send(inetSocketAddress, data);
     }
 
-    private void onGetPeers(InetSocketAddress InetSocketAddress, BencodeMap data) throws IOException {
-
+    private void onGetPeers(InetSocketAddress inetSocketAddress, BencodeMap data) throws IOException {
+        logger.warning("监听到种子GetPeers:" + data);
         BencodeMap re = new BencodeMap() {{
             putByteArray(NODES, nodeWith(data, INFO_HASH));
             putByteArray(TOKEN, makeToken());
             putByteArray(ID, getSelfId());
         }};
         BencodeMap response = getResponse(re);
-        sendTo(InetSocketAddress, response);
+        sendTo(inetSocketAddress, response);
     }
 
-    private void onFindNode(InetSocketAddress InetSocketAddress, BencodeMap data) throws IOException {
+    private void onFindNode(InetSocketAddress inetSocketAddress, BencodeMap data) throws IOException {
         BencodeMap re = new BencodeMap() {{
             putByteArray(NODES, nodeWith(data, TARGET));
             putByteArray(ID, getSelfId());
         }};
         BencodeMap response = getResponse(re);
-        sendTo(InetSocketAddress, response);
+        sendTo(inetSocketAddress, response);
     }
 
-    private void onPing(InetSocketAddress InetSocketAddress) throws IOException {
+    private void onPing(InetSocketAddress inetSocketAddress) throws IOException {
         BencodeMap re = new BencodeMap() {{
             putByteArray(ID, getSelfId());
         }};
         BencodeMap response = getResponse(re);
-        sendTo(InetSocketAddress, response);
+        sendTo(inetSocketAddress, response);
     }
 
-    private void onAnnouncePeer(InetSocketAddress InetSocketAddress) throws IOException {
-        onPing(InetSocketAddress);
+    private void onAnnouncePeer(InetSocketAddress inetSocketAddress, BencodeMap data) throws IOException {
+        logger.warning("监听到种子AnnouncePeer:" + data);
+        onPing(inetSocketAddress);
     }
 
-    private void onException(InetSocketAddress InetSocketAddress, BencodeMap data, Exception e) {
+    private void onException(InetSocketAddress inetSocketAddress, BencodeMap data, Exception e) {
+        logger.warning("收到错误回复" + inetSocketAddress.toString() + data);
         logger.log(Level.WARNING, e.getMessage(), e);
     }
 }
