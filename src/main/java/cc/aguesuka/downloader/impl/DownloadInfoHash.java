@@ -4,11 +4,7 @@ import cc.aguesuka.downloader.IDownloadInfoHash;
 import cc.aguesuka.downloader.IInfoHashSaver;
 import cc.aguesuka.downloader.IMetaDataDownloader;
 import cc.aguesuka.downloader.IPeerFinder;
-import cc.aguesuka.util.HexUtil;
 import cc.aguesuka.util.inject.annotation.Inject;
-import cc.aguesuka.util.log.LogSetting;
-
-import java.util.logging.Logger;
 
 /**
  * @author :yangmingyuxing
@@ -21,7 +17,6 @@ public class DownloadInfoHash implements IDownloadInfoHash {
     IInfoHashSaver infoHashSaver;
     @Inject
     IPeerFinder peerFinder;
-
 
     @Override
     public void download(byte[] infoHash) throws Exception {

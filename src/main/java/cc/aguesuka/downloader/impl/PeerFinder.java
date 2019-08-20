@@ -186,7 +186,7 @@ public class PeerFinder implements IPeerFinder {
                                     hasGetPeer.add(addr);
                                     return metaDataDownloader.downloadMataData(infoHash, addr);
                                 } catch (Exception e) {
-                                    logger.log(Level.WARNING, addr + " 下载失败 " + e.getMessage(), e);
+                                    logger.log(Level.FINE, addr + " 下载失败 " + e.getMessage());
                                     return shouldShutDown() ? EMPTY_ARRAY : null;
                                 }
                             }
@@ -229,6 +229,7 @@ public class PeerFinder implements IPeerFinder {
                     byte[] bytes = submit.get();
                     if (bytes.length > 0) {
                         isShutDown = true;
+                        logger.fine("info信息下载完成");
                         return bytes;
                     }
                 }

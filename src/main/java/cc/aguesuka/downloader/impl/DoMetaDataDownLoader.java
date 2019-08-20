@@ -101,10 +101,13 @@ public class DoMetaDataDownLoader implements IMetaDataDownloader {
         }
 
         private void recvHandShake() throws IOException {
+            // jdk 1.8
+            recvByCount(68);
+             /* jdk 1.9
             byte[] bytes = recvByCount(68);
 
             int checkLength = 20;
-            /* jdk 1.9
+
             if (!Arrays.equals(HANDSHAKE_BYTES, 0, checkLength, bytes, 0, checkLength)) {
                 throw new IOException("recv hand shake error");
             }
@@ -114,8 +117,8 @@ public class DoMetaDataDownLoader implements IMetaDataDownloader {
         private void recvPeerInfo() throws IOException {
             byte[] message = recvExtendedMessage0x14();
             BencodeMap bencodeMap = Bencode.parse(ByteBuffer.wrap(message, 2, message.length - 2));
-            utMetadata = bencodeMap.getBencodeMap("m").getInt("ut_metadata");
-            metadataSize = bencodeMap.getInt("metadata_size");
+            utMetadata = (int) bencodeMap.getBencodeMap("m").getLong("ut_metadata");
+            metadataSize = (int) bencodeMap.getLong("metadata_size");
             logger.fine("metadataSize = " + metadataSize);
             if (utMetadata < 0 || metadataSize < 0) {
                 throw new IOException("recv peer info error");
@@ -148,7 +151,7 @@ public class DoMetaDataDownLoader implements IMetaDataDownloader {
                 int read = inputStream.read(result, readCount, count - readCount);
                 readCount += read;
             }
-            logger.fine("recv message:" + HexUtil.encode(result));
+            logger.fine("recv message:" + address + " " + HexUtil.encode(result));
             return result;
 
         }
@@ -167,7 +170,7 @@ public class DoMetaDataDownLoader implements IMetaDataDownloader {
 
         private void sendMySupport() throws IOException {
             BencodeMap m = new BencodeMap();
-            m.putInt("ut_metadata", 1);
+            m.putLong("ut_metadata", 1);
             BencodeMap message = new BencodeMap();
             message.put("m", m);
             sendExtended(0, message);
@@ -176,8 +179,8 @@ public class DoMetaDataDownLoader implements IMetaDataDownloader {
         private int downloadPiece(int pieceNum, byte[] toByteArray, int offset) throws IOException {
             logger.fine("正在下载第:" + pieceNum + " 块");
             BencodeMap bencode = new BencodeMap();
-            bencode.putInt("msg_type", 0);
-            bencode.putInt("piece", pieceNum);
+            bencode.putLong("msg_type", 0);
+            bencode.putLong("piece", pieceNum);
             sendExtended(utMetadata, bencode);
             byte[] recv = recvExtendedMessage0x14();
             ByteBuffer buffer = ByteBuffer.wrap(recv, 2, recv.length - 2);

@@ -24,6 +24,7 @@ public class InfoHashSaver implements IInfoHashSaver {
 
     @Override
     public void save(byte[] infoHash, byte[] peerInfo) throws IOException {
+        logger.fine("准备保存文件");
         String fileName = HexUtil.encode(infoHash) + ".torrent";
         BencodeMap peerMap = new BencodeMap();
         peerMap.putByteArray("announce", "udp://tracker.openbittorrent.com:80/announce".getBytes(StandardCharsets.UTF_8));
@@ -31,5 +32,6 @@ public class InfoHashSaver implements IInfoHashSaver {
         Path path = Paths.get(fileName);
         logger.fine("保存文件:" + path);
         Files.write(path, peerMap.toBencodeBytes(), StandardOpenOption.CREATE);
+        Files.write(Paths.get(HexUtil.encode(infoHash)+".info"), peerInfo, StandardOpenOption.CREATE);
     }
 }
