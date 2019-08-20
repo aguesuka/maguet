@@ -5,7 +5,7 @@ package cc.aguesuka.util.stop;
  * 2019/7/29 21:31
  */
 public class ShutdownFlag {
-    private boolean isShutdown = false;
+    private volatile boolean isShutdown = false;
 
     public void shutdown() {
         isShutdown = true;
