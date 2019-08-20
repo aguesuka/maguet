@@ -125,9 +125,23 @@ public class DhtConnectionImpl implements DhtConnection<InetSocketAddress, Benco
         socket = null;
     }
 
+    /**
+     * 订阅者
+     */
     private static class Subscriber {
         private BencodeMap response;
 
+        /**
+         * 发送消息到目标地址,并订阅目标地址返回的消息,进入阻塞状态,
+         * 直到发布者收到消息调用{@link Subscriber#onResponse},返回消息
+         *
+         * @param dhtConnectionImpl 连接实现
+         * @param address           目标地址
+         * @param request           请求的消息
+         * @param timeout           超时
+         * @return 返回的结果
+         * @throws IOException 连接异常
+         */
         private synchronized BencodeMap request(DhtConnectionImpl dhtConnectionImpl, InetSocketAddress address,
                                                 BencodeMap request, Timeout timeout) throws IOException {
 
@@ -144,6 +158,11 @@ public class DhtConnectionImpl implements DhtConnection<InetSocketAddress, Benco
             return response;
         }
 
+        /**
+         * 发布者{@link DhtConnectionImpl}收到订阅的消息调用该方法
+         *
+         * @param bencode 收到的消息
+         */
         private synchronized void onResponse(BencodeMap bencode) {
             this.response = bencode;
             this.notify();
