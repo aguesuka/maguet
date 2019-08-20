@@ -79,7 +79,7 @@ public class Bencode {
 
         private BencodeInteger getNextInt() {
             check(INT);
-            int result = nextNums();
+            long result = nextNums();
             check(END);
             return new BencodeInteger(result);
         }
@@ -112,7 +112,7 @@ public class Bencode {
             return new RuntimeException();
         }
 
-        private int nextNums() {
+        private long nextNums() {
             buff.mark();
             int i = 1;
             byte b = buff.get();
@@ -130,13 +130,13 @@ public class Bencode {
             buff.reset();
             byte[] bytes = new byte[i];
             buff.get(bytes);
-            return Integer.parseInt(new String(bytes, StandardCharsets.US_ASCII));
+            return Long.parseLong(new String(bytes, StandardCharsets.US_ASCII));
         }
 
         private BencodeByteArray getNextBytes() {
-            int len = nextNums();
+            long len = nextNums();
             check(SPLIT);
-            byte[] result = new byte[len];
+            byte[] result = new byte[(int)len];
             buff.get(result);
             return new BencodeByteArray(result);
         }
