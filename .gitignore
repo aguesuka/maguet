@@ -24,6 +24,8 @@ hs_err_pid*
 
 # torrent file
 *.torrent
+*.info
+
 # idea file
 .idea/
 target/
