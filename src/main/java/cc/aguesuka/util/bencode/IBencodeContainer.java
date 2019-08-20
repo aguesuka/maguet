@@ -14,12 +14,12 @@ public interface IBencodeContainer<T> {
     byte[] getByteArray(T key);
 
     /**
-     * get 强转为int
+     * get 强转为long
      *
      * @param key 键
      * @return int
      */
-    int getInt(T key);
+    long getLong(T key);
 
     /**
      * get 强转为BencodeMap

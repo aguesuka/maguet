@@ -153,9 +153,9 @@ public class Bencode {
             }
         }
 
-        private void putInt(int i) {
+        private void putLong(long i) {
             outputStream.write(INT);
-            write(Integer.toString(i).getBytes(UTF_8));
+            write(Long.toString(i).getBytes(UTF_8));
             outputStream.write(END);
         }
 
@@ -190,7 +190,7 @@ public class Bencode {
             } else if (o instanceof BencodeList) {
                 putList((BencodeList) o);
             } else if (o instanceof BencodeInteger) {
-                putInt(((BencodeInteger) o).getInt());
+                putLong(((BencodeInteger) o).getLong());
             } else if (o instanceof BencodeByteArray) {
                 putByteArray(((BencodeByteArray) o).getBytes());
             } else {

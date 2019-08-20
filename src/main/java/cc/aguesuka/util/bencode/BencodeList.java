@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * 2019/6/30 16:58
  */
 public class BencodeList extends ArrayList<IBencode> implements IBencode, IBencodeContainer<Integer>{
-    public void addInt(int i){
+    public void addLong(long i){
         add(new BencodeInteger(i));
     }
 
@@ -20,8 +20,8 @@ public class BencodeList extends ArrayList<IBencode> implements IBencode, IBenco
     }
 
     @Override
-    public int getInt(Integer key) {
-        return ((BencodeInteger) get(key)).getInt();
+    public long getLong(Integer key) {
+        return ((BencodeInteger) get(key)).getLong();
     }
 
     @Override

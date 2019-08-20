@@ -14,7 +14,7 @@ public class BencodeMap extends LinkedHashMap<String, IBencode> implements IBenc
     public void putString(String key,String value){
         putByteArray(key, value.getBytes(StandardCharsets.UTF_8));
     }
-    public void putInt(String key, int value) {
+    public void putLong(String key, long value) {
         put(key, new BencodeInteger(value));
     }
 
@@ -24,8 +24,8 @@ public class BencodeMap extends LinkedHashMap<String, IBencode> implements IBenc
     }
 
     @Override
-    public int getInt(String key) {
-        return ((BencodeInteger) get(key)).getInt();
+    public long getLong(String key) {
+        return ((BencodeInteger) get(key)).getLong();
     }
 
     @Override
