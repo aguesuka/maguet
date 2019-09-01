@@ -10,6 +10,7 @@ import cc.aguesuka.util.log.LogSetting;
 import cc.aguesuka.util.stop.ShutdownFlag;
 import cc.aguesuka.util.stop.Timeout;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -149,8 +150,8 @@ public class DoMetaDataDownLoader implements IMetaDataDownloader {
                 timeout.checkTimeout();
                 shutdownFlag.check();
                 int read = inputStream.read(result, readCount, count - readCount);
-                if(read == -1){
-                    throw new IOException("连接已经关闭");
+                if (read == -1) {
+                    throw new EOFException();
                 }
                 readCount += read;
             }
