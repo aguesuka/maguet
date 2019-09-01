@@ -149,6 +149,9 @@ public class DoMetaDataDownLoader implements IMetaDataDownloader {
                 timeout.checkTimeout();
                 shutdownFlag.check();
                 int read = inputStream.read(result, readCount, count - readCount);
+                if(read == -1){
+                    throw new IOException("连接已经关闭");
+                }
                 readCount += read;
             }
             logger.fine("recv message:" + address + " " + HexUtil.encode(result));
