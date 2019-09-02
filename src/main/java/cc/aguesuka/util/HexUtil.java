@@ -38,7 +38,7 @@ public final class HexUtil {
         for (int i = h10; i <= h16; i++) {
             H2B[i] = num++;
         }
-        num = 0;
+        num = 10;
         h10 = 'a';
         h16 = 'f';
         for (int i = h10; i <= h16; i++) {

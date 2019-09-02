@@ -1,5 +1,6 @@
 package cc.aguesuka.util;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -11,6 +12,12 @@ import java.util.Random;
  */
 public class HexUtilTest {
 
+    @Test
+    public void litterCaseTest() {
+        String s = "4e2405dbde0045f3fa341875913908e84ca0a24c";
+        byte[] target = HexUtil.decode(s);
+        Assert.assertEquals(s.toUpperCase(), HexUtil.encode(target));
+    }
 
     @Test
     public void encode() {
