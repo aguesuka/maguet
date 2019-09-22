@@ -8,7 +8,7 @@ http://www.bittorrent.org/beps/bep_0009.html
 http://www.bittorrent.org/beps/bep_0010.html
 ## 使用方法  
 1.编译  
-```mvn  package```
+```mvn  package```  
 2.执行命令  
 ```java -classpath bit-finder-0.1.jar cc.aguesuka.run.Main 磁力链接的info_hash部分```   
 ##  磁力链接嗅探器
