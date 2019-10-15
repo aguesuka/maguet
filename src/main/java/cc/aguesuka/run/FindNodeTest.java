@@ -3,6 +3,7 @@ package cc.aguesuka.run;
 import cc.aguesuka.dht.connection.DhtRequest;
 import cc.aguesuka.util.bencode.Bencode;
 import cc.aguesuka.util.bencode.BencodeMap;
+import cc.aguesuka.util.stop.Timeout;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -41,10 +42,12 @@ public class FindNodeTest {
         socket.send(request);
 
         // 接受回复
+        Timeout timeout = Timeout.getMilliSecond(10000);
         byte[] recvBuff = new byte[2 << 12];
         DatagramPacket responsePacket = new DatagramPacket(recvBuff, recvBuff.length);
         do {
             socket.receive(responsePacket);
+            timeout.checkTimeout();
         } while (responsePacket.getLength() <= 0);
 
         // 解析回复
