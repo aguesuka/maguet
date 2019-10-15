@@ -3,7 +3,6 @@ package cc.aguesuka.run;
 import cc.aguesuka.dht.connection.DhtRequest;
 import cc.aguesuka.util.bencode.Bencode;
 import cc.aguesuka.util.bencode.BencodeMap;
-import cc.aguesuka.util.stop.Timeout;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -39,19 +38,18 @@ public class FindNodeTest {
         DatagramPacket request = new DatagramPacket(msg, msg.length);
         request.setSocketAddress(new InetSocketAddress(address, port));
         DatagramSocket socket = new DatagramSocket();
+        socket.setSoTimeout(10000);
         socket.send(request);
-
         // 接受回复
-        Timeout timeout = Timeout.getMilliSecond(10000);
         byte[] recvBuff = new byte[2 << 12];
         DatagramPacket responsePacket = new DatagramPacket(recvBuff, recvBuff.length);
-        do {
-            socket.receive(responsePacket);
-            timeout.checkTimeout();
-        } while (responsePacket.getLength() <= 0);
-
-        // 解析回复
-        BencodeMap responseMessage = Bencode.parse(ByteBuffer.wrap(responsePacket.getData()));
-        System.out.println("responseMessage = " + responseMessage);
+        socket.receive(responsePacket);
+        if (responsePacket.getLength() > 0) {
+            // 解析回复
+            BencodeMap responseMessage = Bencode.parse(ByteBuffer.wrap(responsePacket.getData()));
+            System.out.println("responseMessage = " + responseMessage);
+        } else {
+            System.out.println("连接超时");
+        }
     }
 }
