@@ -36,8 +36,9 @@ public class DhtHandler {
     private
     Bucket<BencodeByteArray, InetSocketAddress> bucket;
 
-    private static BencodeMap getResponse(BencodeMap re) {
+    private static BencodeMap getResponse(BencodeMap re, BencodeMap query) {
         BencodeMap clone = (BencodeMap) baseResponse.clone();
+        clone.put(T, query.get(T));
         clone.put("r", re);
         return clone;
     }
@@ -61,7 +62,7 @@ public class DhtHandler {
                     onGetPeers(inetSocketAddress, data);
                     break;
                 case PING:
-                    onPing(inetSocketAddress);
+                    onPing(inetSocketAddress, data);
                     break;
                 case ANNOUNCE_PEER:
                     onAnnouncePeer(inetSocketAddress, data);
@@ -104,7 +105,7 @@ public class DhtHandler {
             putByteArray(TOKEN, makeToken());
             putByteArray(ID, getSelfId());
         }};
-        BencodeMap response = getResponse(re);
+        BencodeMap response = getResponse(re, data);
         sendTo(inetSocketAddress, response);
     }
 
@@ -113,21 +114,21 @@ public class DhtHandler {
             putByteArray(NODES, nodeWith(data, TARGET));
             putByteArray(ID, getSelfId());
         }};
-        BencodeMap response = getResponse(re);
+        BencodeMap response = getResponse(re, data);
         sendTo(inetSocketAddress, response);
     }
 
-    private void onPing(InetSocketAddress inetSocketAddress) throws IOException {
+    private void onPing(InetSocketAddress inetSocketAddress, BencodeMap data) throws IOException {
         BencodeMap re = new BencodeMap() {{
             putByteArray(ID, getSelfId());
         }};
-        BencodeMap response = getResponse(re);
+        BencodeMap response = getResponse(re, data);
         sendTo(inetSocketAddress, response);
     }
 
     private void onAnnouncePeer(InetSocketAddress inetSocketAddress, BencodeMap data) throws IOException {
         logger.warning("监听到种子AnnouncePeer:" + data);
-        onPing(inetSocketAddress);
+        onPing(inetSocketAddress, data);
     }
 
     private void onException(InetSocketAddress inetSocketAddress, BencodeMap data, Exception e) {
