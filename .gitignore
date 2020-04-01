@@ -3,7 +3,9 @@
 
 # Log file
 *.log
-
+logs/
+#data files
+data/
 # BlueJ files
 *.ctxt
 
@@ -30,3 +32,6 @@ hs_err_pid*
 .idea/
 target/
 *.iml
+
+# produce properties
+config.properties
