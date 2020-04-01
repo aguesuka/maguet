@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 /**
  * send response when DhtClient recv query.
  *
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/13 11:01
  */
 public class DhtResponder implements DhtListener {

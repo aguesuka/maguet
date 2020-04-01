@@ -3,7 +3,7 @@ package cc.aguesuka.btfind.metadata;
 import cc.aguesuka.btfind.dispatch.EventLoop;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/9 15:12
  */
 public class MetadataDownloaderGroup {

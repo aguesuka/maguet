@@ -1,7 +1,7 @@
 package cc.aguesuka.btfind.util.bencode;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2019/9/1 23:15
  */
 public final class BencodeException extends RuntimeException {

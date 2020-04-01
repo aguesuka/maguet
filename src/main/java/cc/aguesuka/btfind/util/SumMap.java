@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/19 14:19
  */
 public class SumMap {

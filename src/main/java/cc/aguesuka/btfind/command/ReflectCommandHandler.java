@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * evil reflect
  *
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/21 10:06
  */
 public class ReflectCommandHandler {

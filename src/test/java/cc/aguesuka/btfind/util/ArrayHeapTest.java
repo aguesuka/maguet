@@ -10,22 +10,22 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2019/12/28 16:16
  */
-public class UnorderedArrayTest {
-    private UnorderedArray<Long> unorderedArray;
+public class ArrayHeapTest {
+    private ArrayHeap<Long> arrayHeap;
     private Random random = new SecureRandom();
 
     @Before
     public void before() {
-        unorderedArray = new UnorderedArray<>(16);
+        arrayHeap = new ArrayHeap<>(16);
     }
 
-    private <E extends Comparable<E>> List<E> toListAndSort(UnorderedArray<E> unorderedArray) {
-        int size = unorderedArray.size();
+    private <E extends Comparable<E>> List<E> toListAndSort(ArrayHeap<E> arrayHeap) {
+        int size = arrayHeap.size();
         ArrayList<E> list = new ArrayList<>(size);
-        unorderedArray.foreach(list::add);
+        arrayHeap.foreach(list::add);
         Assert.assertEquals(list.size(), size);
         Collections.sort(list);
         return list;
@@ -36,10 +36,10 @@ public class UnorderedArrayTest {
 
         int endExclusive = 10000;
         List<Long> collect = LongStream.range(0, endExclusive).peek(i -> {
-            Assert.assertEquals(i, unorderedArray.size());
-            unorderedArray.add(i);
+            Assert.assertEquals(i, arrayHeap.size());
+            arrayHeap.add(i);
         }).boxed().collect(Collectors.toList());
-        Assert.assertEquals(collect, toListAndSort(unorderedArray));
+        Assert.assertEquals(collect, toListAndSort(arrayHeap));
     }
 
     @Test
@@ -50,18 +50,18 @@ public class UnorderedArrayTest {
         List<Long> testList = new ArrayList<>();
         LongStream.range(0, endExclusive).boxed().forEach(i -> {
             testList.add(i);
-            int index = unorderedArray.add(i);
+            int index = arrayHeap.add(i);
             longIndex.put(i, index);
 
-            Assert.assertEquals(testList.size(), unorderedArray.size());
-            int indexForRemove = random.nextInt(unorderedArray.size() * 10);
+            Assert.assertEquals(testList.size(), arrayHeap.size());
+            int indexForRemove = random.nextInt(arrayHeap.size() * 10);
             while (indexForRemove < testList.size()) {
                 Long remove = testList.remove(indexForRemove);
-                unorderedArray.remove(longIndex.get(remove), remove);
+                arrayHeap.remove(longIndex.get(remove), remove);
             }
 
-            Assert.assertEquals(testList.size(), unorderedArray.size());
+            Assert.assertEquals(testList.size(), arrayHeap.size());
         });
-        Assert.assertEquals(testList, toListAndSort(unorderedArray));
+        Assert.assertEquals(testList, toListAndSort(arrayHeap));
     }
 }

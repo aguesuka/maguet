@@ -1,7 +1,7 @@
 package cc.aguesuka.btfind.dht.model;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/14 10:15
  */
 public class DhtNodeInfo {

@@ -7,10 +7,10 @@ import java.util.function.Consumer;
 /**
  * unordered array of add and remove cast O(1)
  *
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2019/12/28 15:25
  */
-public final class UnorderedArray<E> {
+public final class ArrayHeap<E> {
     private static final int[] EMPTY_INT_ARRAY = new int[0];
     private int size = 0;
     private Object[] data;
@@ -18,7 +18,7 @@ public final class UnorderedArray<E> {
     private int currentIndex = 0;
     private int emptyIndex = 0;
 
-    public UnorderedArray(int initSize) {
+    public ArrayHeap(int initSize) {
         data = new Object[initSize];
         empty = EMPTY_INT_ARRAY;
     }

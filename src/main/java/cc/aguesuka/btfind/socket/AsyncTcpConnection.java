@@ -17,7 +17,7 @@ import java.util.function.IntConsumer;
 /**
  * Async tcp client connection,dispatch with {@link EventLoop}. auto close if not has async task.
  *
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/8 11:10
  */
 public class AsyncTcpConnection implements Closeable {

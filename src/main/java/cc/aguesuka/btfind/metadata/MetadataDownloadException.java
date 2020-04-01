@@ -1,7 +1,7 @@
 package cc.aguesuka.btfind.metadata;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/19 14:48
  */
 public class MetadataDownloadException extends RuntimeException {

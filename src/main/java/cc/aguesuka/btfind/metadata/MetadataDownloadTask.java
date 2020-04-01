@@ -8,7 +8,7 @@ import java.net.SocketAddress;
 import java.util.*;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/20 11:48
  */
 public class MetadataDownloadTask {

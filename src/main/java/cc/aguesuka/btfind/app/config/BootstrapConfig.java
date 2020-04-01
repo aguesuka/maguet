@@ -5,7 +5,7 @@ import java.util.Properties;
 
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/22 10:52
  */
 public class BootstrapConfig {

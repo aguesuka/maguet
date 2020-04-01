@@ -3,7 +3,7 @@ package cc.aguesuka.btfind.util;
 import java.util.StringJoiner;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/19 14:30
  */
 public class NumberLogger {

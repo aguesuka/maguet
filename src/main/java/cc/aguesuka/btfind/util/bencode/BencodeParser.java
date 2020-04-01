@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2019/9/3 20:09
  */
 class BencodeParser {

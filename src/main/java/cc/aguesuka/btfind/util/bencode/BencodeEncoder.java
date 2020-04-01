@@ -9,7 +9,7 @@ import java.util.Map;
  * java object to bencode byte array
  *
  *
- * @author yangmingyuxing
+ * @author aguesuka
  */
 class BencodeEncoder {
     private Output output;

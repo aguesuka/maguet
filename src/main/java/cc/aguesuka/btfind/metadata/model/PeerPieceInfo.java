@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 /**
  * save peer piece info for download metadata with <a href="http://www.bittorrent.org/beps/bep_0009.html">bep_0009</a>
  *
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2019/12/8 14:01
  */
 public final class PeerPieceInfo {

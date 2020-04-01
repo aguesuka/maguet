@@ -6,7 +6,7 @@ import java.security.NoSuchAlgorithmException;
 /**
  * byte util
  *
- * @author yangmingyuxing
+ * @author aguesuka
  */
 public final class ByteUtil {
     private ByteUtil() {

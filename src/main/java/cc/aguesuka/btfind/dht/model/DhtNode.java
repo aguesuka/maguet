@@ -11,7 +11,7 @@ import java.util.StringJoiner;
 /**
  * Immutable
  *
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/15 10:36
  */
 public final class DhtNode {

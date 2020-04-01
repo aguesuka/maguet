@@ -1,7 +1,7 @@
 package cc.aguesuka.btfind.socket;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/19 14:54
  */
 public class AsyncTcpException extends RuntimeException{

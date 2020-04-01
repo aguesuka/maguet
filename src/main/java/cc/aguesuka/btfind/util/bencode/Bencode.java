@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2019/12/12 21:36
  */
 public class Bencode {

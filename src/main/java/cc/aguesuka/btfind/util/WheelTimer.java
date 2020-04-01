@@ -1,12 +1,12 @@
 package cc.aguesuka.btfind.util;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2019/12/28 21:37
  */
 public class WheelTimer {
     private long tickDuration;
-    private UnorderedArray<TimeoutListener>[] wheel;
+    private ArrayHeap<TimeoutListener>[] wheel;
     private int bucketInitSize;
     private long nextTickTime;
     private int tickIndex;
@@ -25,9 +25,9 @@ public class WheelTimer {
         this.bucketInitSize = bucketInitSize;
 
         @SuppressWarnings("unchecked")
-        UnorderedArray<TimeoutListener>[] wheel = new UnorderedArray[ticksPerWheel];
+        ArrayHeap<TimeoutListener>[] wheel = new ArrayHeap[ticksPerWheel];
         for (int i = 0; i < wheel.length; i++) {
-            wheel[i] = new UnorderedArray<>(bucketInitSize);
+            wheel[i] = new ArrayHeap<>(bucketInitSize);
         }
         this.wheel = wheel;
         nextTickTime = now() + nextTickTime;
@@ -60,7 +60,7 @@ public class WheelTimer {
         if (wheelIndex < 0 || bucketIndex < 0 || wheelIndex > wheel.length) {
             return;
         }
-        UnorderedArray<TimeoutListener> bucket = wheel[wheelIndex];
+        ArrayHeap<TimeoutListener> bucket = wheel[wheelIndex];
         bucket.remove(bucketIndex, timeoutListener);
     }
 
@@ -68,8 +68,8 @@ public class WheelTimer {
         ticking = true;
         int result = 0;
         while (nextTickLeft() <= 0) {
-            UnorderedArray<TimeoutListener> bucket = wheel[tickIndex];
-            wheel[tickIndex] = new UnorderedArray<>(bucketInitSize);
+            ArrayHeap<TimeoutListener> bucket = wheel[tickIndex];
+            wheel[tickIndex] = new ArrayHeap<>(bucketInitSize);
             incrementTickIndex();
 
             bucket.foreach(TimeoutListener::timeout);

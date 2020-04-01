@@ -16,7 +16,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/13 10:17
  */
 public class DhtClient {

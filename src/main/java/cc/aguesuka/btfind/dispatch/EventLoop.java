@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2019/12/29 18:04
  */
 public class EventLoop implements Closeable {

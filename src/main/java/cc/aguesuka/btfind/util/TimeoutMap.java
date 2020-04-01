@@ -10,7 +10,7 @@ import java.util.function.BiConsumer;
  *
  * @param <K> key
  * @param <V> value
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/14 10:54
  */
 public class TimeoutMap<K, V> {

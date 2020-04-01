@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 /**
  * query sender. send with callback, callback will be ignore if timeout.
  *
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/17 15:53
  */
 public class DhtQuerySender {

@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * HexUtil.
  *
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2019/7/11 23:25
  */
 public final class HexUtil {

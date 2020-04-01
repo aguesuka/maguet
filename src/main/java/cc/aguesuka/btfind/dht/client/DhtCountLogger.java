@@ -8,7 +8,7 @@ import java.lang.reflect.Proxy;
 /**
  * record {@link DhtListener} called count
  *
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/14 16:17
  */
 public interface DhtCountLogger extends DhtListener {

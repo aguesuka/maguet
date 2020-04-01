@@ -17,7 +17,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * @author :yangmingyuxing
+ * @author :aguesuka
  * 2020/2/8 12:32
  */
 public class MetadataDownloader {
