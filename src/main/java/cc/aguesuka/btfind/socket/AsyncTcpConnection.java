@@ -21,6 +21,7 @@ import java.util.function.IntConsumer;
  * 2020/2/8 11:10
  */
 public class AsyncTcpConnection implements Closeable {
+    // region fields
     private boolean isWorking;
     private SocketChannel channel;
     private SelectionKey key;
@@ -31,7 +32,9 @@ public class AsyncTcpConnection implements Closeable {
     private ByteBuffer readBuffer;
     private ByteBuffer writeBuffer;
     private BooleanSupplier beforeHandleCheck;
+    // endregion
 
+    // region constructor
     private AsyncTcpConnection(Consumer<Throwable> throwableHandler,
                                Runnable closeCallback,
                                BooleanSupplier beforeHandleCheck) {
@@ -57,15 +60,9 @@ public class AsyncTcpConnection implements Closeable {
                                         BooleanSupplier beforeHandle) {
         return new AsyncTcpConnection(throwableConsumer, closeCallback, beforeHandle);
     }
+    // endregion
 
-    private void execute(Runnable runnable) {
-        try {
-            runnable.run();
-        } catch (RuntimeException e) {
-            close();
-            throwableHandler.accept(e);
-        }
-    }
+    // region connectAndClose
 
     /**
      * Connect to server.
@@ -103,13 +100,32 @@ public class AsyncTcpConnection implements Closeable {
     }
 
     /**
+     * close connection, not throw exception
+     */
+    @Override
+    public void close() {
+        try {
+            if (isWorking) {
+                isWorking = false;
+                channel.close();
+                closeCallback.run();
+            }
+        } catch (Exception e) {
+            throwableHandler.accept(e);
+        }
+    }
+    // endregion
+
+    // region recv
+
+    /**
      * Read bytes async. callback will execute when {@code buffer remaining > length}
      *
      * @param length   length for bytes
      * @param callback Consumer of bytes
      */
     public void recvBytes(int length, Consumer<byte[]> callback) {
-         if(length < 0) {
+        if (length < 0) {
             throw new MetadataDownloadException("msg length < 0");
         }
         readForLength(length, () -> {
@@ -127,7 +143,9 @@ public class AsyncTcpConnection implements Closeable {
     public void recvInt(IntConsumer callback) {
         readForLength(4, () -> callback.accept(readBuffer.getInt()));
     }
+    // endregion
 
+    // region send
     /**
      * write bytes to writeBuffer
      *
@@ -191,10 +209,6 @@ public class AsyncTcpConnection implements Closeable {
         }
     }
 
-    private void setCallback(Runnable callback) {
-        this.callback = callback;
-    }
-
     private void readForLength(int length, Runnable callback) {
         if (readBuffer.remaining() >= length) {
             setCallback(callback);
@@ -215,22 +229,22 @@ public class AsyncTcpConnection implements Closeable {
             readForLength(length, callback);
         };
     }
+    // endregion
 
-    /**
-     * close connection, not throw exception
-     */
-    @Override
-    public void close() {
+    // region handle
+    private void setCallback(Runnable callback) {
+        this.callback = callback;
+    }
+
+    private void execute(Runnable runnable) {
         try {
-            if (isWorking) {
-                isWorking = false;
-                channel.close();
-                closeCallback.run();
-            }
-        } catch (Exception e) {
+            runnable.run();
+        } catch (RuntimeException e) {
+            close();
             throwableHandler.accept(e);
         }
     }
+
 
     private class Handler implements EventLoop.Handler {
         @Override
@@ -255,4 +269,5 @@ public class AsyncTcpConnection implements Closeable {
             }
         }
     }
+    // endregion
 }
