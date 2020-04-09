@@ -11,7 +11,7 @@ import java.util.StringJoiner;
 public class SumMap {
     private Map<String, Data> map = new HashMap<>();
 
-    public double getCount(String key) {
+    public long getCount(String key) {
         return map.get(key).count;
     }
 

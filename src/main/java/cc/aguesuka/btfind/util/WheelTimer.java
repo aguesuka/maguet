@@ -6,28 +6,22 @@ package cc.aguesuka.btfind.util;
  */
 public class WheelTimer {
     private long tickDuration;
-    private ArrayHeap<TimeoutListener>[] wheel;
-    private int bucketInitSize;
+    private ArrayHeapSpace<TimeoutListener>[] wheel;
     private long nextTickTime;
     private int tickIndex;
     private boolean ticking;
-    public WheelTimer(long tickDuration, int ticksPerWheel, int bucketInitSize) {
+    public WheelTimer(long tickDuration, int ticksPerWheel) {
         if (tickDuration <= 0 || ticksPerWheel <= 0) {
             throw new IllegalArgumentException("tickDuration and ticksPerWheel must > 0");
         }
         if (Long.MAX_VALUE / ticksPerWheel <= tickDuration) {
             throw new IllegalArgumentException("tickDuration or ticksPerWheel too large");
         }
-        if (bucketInitSize <= 0) {
-            throw new IllegalArgumentException("bucketInitSize must > 0");
-        }
         this.tickDuration = tickDuration;
-        this.bucketInitSize = bucketInitSize;
-
         @SuppressWarnings("unchecked")
-        ArrayHeap<TimeoutListener>[] wheel = new ArrayHeap[ticksPerWheel];
+        ArrayHeapSpace<TimeoutListener>[] wheel = new ArrayHeapSpace[ticksPerWheel];
         for (int i = 0; i < wheel.length; i++) {
-            wheel[i] = new ArrayHeap<>(bucketInitSize);
+            wheel[i] = new ArrayHeapSpace<>();
         }
         this.wheel = wheel;
         nextTickTime = now() + nextTickTime;
@@ -60,7 +54,7 @@ public class WheelTimer {
         if (wheelIndex < 0 || bucketIndex < 0 || wheelIndex > wheel.length) {
             return;
         }
-        ArrayHeap<TimeoutListener> bucket = wheel[wheelIndex];
+        ArrayHeapSpace<TimeoutListener> bucket = wheel[wheelIndex];
         bucket.remove(bucketIndex, timeoutListener);
     }
 
@@ -68,11 +62,11 @@ public class WheelTimer {
         ticking = true;
         int result = 0;
         while (nextTickLeft() <= 0) {
-            ArrayHeap<TimeoutListener> bucket = wheel[tickIndex];
-            wheel[tickIndex] = new ArrayHeap<>(bucketInitSize);
+            ArrayHeapSpace<TimeoutListener> bucket = wheel[tickIndex];
+            wheel[tickIndex] = new ArrayHeapSpace<>();
             incrementTickIndex();
 
-            bucket.foreach(TimeoutListener::timeout);
+            bucket.forEach(TimeoutListener::timeout);
             result += bucket.size();
             bucket.clear();
         }

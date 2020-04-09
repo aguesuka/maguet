@@ -6,13 +6,10 @@ import cc.aguesuka.btfind.util.WheelTimer;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URL;
 import java.nio.channels.*;
 import java.util.*;
-import java.util.concurrent.Future;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * @author :aguesuka
@@ -25,7 +22,7 @@ public class EventLoop implements Closeable {
     private volatile boolean closed;
 
     private EventLoop() throws IOException {
-        this.wheelTimer = new WheelTimer(100, 6000, 1000);
+        this.wheelTimer = new WheelTimer(100, 6000);
         selector = Selector.open();
     }
 
