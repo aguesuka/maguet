@@ -142,12 +142,11 @@ public class WheelTickMockNettyHashedWheelTimerTest {
         assertFalse(timer.stop().isEmpty());
     }
 
-
-    @Test(timeout = 10000)
+    @Test
     public void testExecutionOnTime() throws InterruptedException {
         int tickDuration = 200;
-        for (int timeout : Arrays.asList(125, 250, 500, 1000)) {
-            int maxTimeout = 2 * (tickDuration + timeout);
+        for (int timeout : Arrays.asList(0, 62, 125, 250, 500, 1000)) {
+            int maxTimeout = tickDuration * 2 + timeout;
             final HashedWheelTimer timer = new HashedWheelTimer(tickDuration, TimeUnit.MILLISECONDS);
             final BlockingQueue<Long> queue = new LinkedBlockingQueue<Long>();
 
@@ -164,7 +163,8 @@ public class WheelTickMockNettyHashedWheelTimerTest {
 
             for (int i = 0; i < scheduledTasks; i++) {
                 long delay = queue.take();
-                assertTrue("Timeout + " + scheduledTasks + " delay " + delay + " must be " + timeout + " < " + maxTimeout,
+                assertTrue(" Timeout + " + scheduledTasks + " delay " + delay +
+                                " must be " + timeout + " < " + maxTimeout,
                         delay >= timeout && delay < maxTimeout);
             }
 
@@ -268,30 +268,33 @@ public class WheelTickMockNettyHashedWheelTimerTest {
         void run(Timeout timeout) throws Exception;
     }
 
-    @SuppressWarnings("unused")
-    public interface Timeout {
 
+    public interface Timeout {
+        @SuppressWarnings("unused")
         Timer timer();
 
+        @SuppressWarnings("unused")
         TimerTask task();
 
         boolean isExpired();
 
+        @SuppressWarnings("unused")
         boolean isCancelled();
 
         boolean cancel();
     }
 
-    @SuppressWarnings("unused")
+
     private static class HashedWheelTimer implements Timer {
         private final WheelTick<Runnable> tick;
         private volatile boolean running;
-        private Set<Timeout> timeoutSet = new HashSet<>();
+        private final Set<Timeout> timeoutSet = new HashSet<>();
         private long maxPendingTimeouts;
 
         public HashedWheelTimer(
                 ThreadFactory threadFactory,
-                long tickDuration, TimeUnit unit, int ticksPerWheel, boolean leakDetection,
+                long tickDuration, TimeUnit unit, int ticksPerWheel,
+                @SuppressWarnings("unused") boolean leakDetection,
                 long maxPendingTimeouts) {
             this(threadFactory, tickDuration, unit, ticksPerWheel);
             this.maxPendingTimeouts = maxPendingTimeouts;
@@ -304,13 +307,13 @@ public class WheelTickMockNettyHashedWheelTimerTest {
 
         }
 
-        private HashedWheelTimer(ThreadFactory threadFactory,
+        private HashedWheelTimer(@SuppressWarnings("unused") ThreadFactory threadFactory,
                                  long tickDuration, TimeUnit unit, int ticksPerWheel) {
             this(tickDuration, unit, ticksPerWheel, System::currentTimeMillis);
         }
 
         private HashedWheelTimer(long tickDuration, TimeUnit timeUnit) {
-            this(tickDuration, timeUnit, 512, System::currentTimeMillis);
+            this(tickDuration, timeUnit, 128, System::currentTimeMillis);
         }
 
         private HashedWheelTimer() {
@@ -325,15 +328,14 @@ public class WheelTickMockNettyHashedWheelTimerTest {
                     List<Runnable> take = tick.take();
                     take.forEach(Runnable::run);
                     nextTickLeft = tick.nextTickLeft(TimeUnit.MILLISECONDS);
-                }
-                if (nextTickLeft > 0) {
-                    try {
-                        Thread.sleep(nextTickLeft);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                    if (nextTickLeft > 0) {
+                        try {
+                            tick.wait(nextTickLeft);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
-
             }
         }
 
@@ -344,7 +346,7 @@ public class WheelTickMockNettyHashedWheelTimerTest {
         }
 
         public long pendingTimeouts() {
-            return tick.size();
+            return tick.unexpiredSize();
         }
 
         @Override
