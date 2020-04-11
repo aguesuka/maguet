@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cc.aguesuka</groupId>
-    <artifactId>ague-dht</artifactId>
+    <artifactId>maguet</artifactId>
     <version>4.0</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
