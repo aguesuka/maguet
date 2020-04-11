@@ -14,11 +14,11 @@ import java.util.function.LongSupplier;
  * <p>
  * Every {@link #tickDuration} time passed, implicit call {@link #doTick} will take the
  * next cell in {@link #wheel}, and make the elements expired. expired elements can get by {@link #take},
- * expired is not on time: {@code delay <= theActuallyExpiredTime <= delay + tickDuration}
+ * expired is not on time: {@code delay <= theActuallyExpiredTime <= delay + tickDuration}.
  * <p>
  * the operation {@link #doTick} cost linear-time bad, but  cast constant-time average.
- * the operation {@link #add} and  {@link #take} would call {@link #doTick},and cost
- * constant-time average. operation {@link #doCancel} cost constant-time.
+ * the operation {@link #add} and  {@link #doCancel}  called {@link #doTick},and cost
+ * constant-time average. operation {@link #take} cost constant-time.
  *
  * @author :aguesuka
  * 2020/4/8 18:36
@@ -36,6 +36,7 @@ public class WheelTick<E> implements Tick<E> {
     private final LongSupplier currentTimeGetter;
     // endregion
 
+
     // region state fields
     private final ArrayHeapSpace<WheelTickTimeout<E>>[] wheel;
 
@@ -45,6 +46,7 @@ public class WheelTick<E> implements Tick<E> {
     private int unexpiredSize;
     private long lastCheckTime;
     // endregion
+
 
     /**
      * create a wheel tick
@@ -118,14 +120,13 @@ public class WheelTick<E> implements Tick<E> {
 
     @Override
     public List<E> take() {
-        doTick();
         List<E> result = Objects.requireNonNullElse(readyTaskList, Collections.emptyList());
         readyTaskList = null;
         return result;
     }
 
     @Override
-    public long nextTickLeft(TimeUnit timeUnit) {
+    public long tick(TimeUnit timeUnit) {
         long now = doTick();
         return timeUnit.convert(nextTickTime - now, this.timeUnit);
     }
@@ -163,6 +164,7 @@ public class WheelTick<E> implements Tick<E> {
 
 
     private boolean doCancel(WheelTickTimeout<E> timeout) {
+        doTick();
         ArrayHeapSpace<WheelTickTimeout<E>> cell = wheel[timeout.indexOfWheel];
         boolean success = cell.remove(timeout.indexOfCell, timeout);
         if (success) {

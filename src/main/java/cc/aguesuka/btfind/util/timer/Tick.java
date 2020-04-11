@@ -24,7 +24,7 @@ public interface Tick<E> {
 
 
     /**
-     * get expired elements
+     * get expired elements, call {@link #tick} before take
      *
      * @return expired elements of this duration or empty list
      */
@@ -32,12 +32,12 @@ public interface Tick<E> {
 
 
     /**
-     * get next tick time left
+     * tick if now >= nextTickTime, return next tick time left
      *
      * @param timeUnit timeUnit of result
-     * @return next tick time  - now, zero if has expired elements.
+     * @return next tick time  - now
      */
-    long nextTickLeft(TimeUnit timeUnit);
+    long tick(TimeUnit timeUnit);
 
     /**
      * get size of unexpired elements

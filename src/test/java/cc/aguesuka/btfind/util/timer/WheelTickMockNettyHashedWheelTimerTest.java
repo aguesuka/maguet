@@ -303,7 +303,9 @@ public class WheelTickMockNettyHashedWheelTimerTest {
         private HashedWheelTimer(long tickDuration, TimeUnit timeUnit, int ticksPerWheel, LongSupplier currentTimeGetter) {
             tick = new WheelTick<>(tickDuration, timeUnit, ticksPerWheel, currentTimeGetter);
             running = true;
-            new Thread(this::loop).start();
+            Thread thread = new Thread(this::loop);
+            thread.setDaemon(true);
+            thread.start();
 
         }
 
@@ -327,7 +329,7 @@ public class WheelTickMockNettyHashedWheelTimerTest {
                 synchronized (tick) {
                     List<Runnable> take = tick.take();
                     take.forEach(Runnable::run);
-                    nextTickLeft = tick.nextTickLeft(TimeUnit.MILLISECONDS);
+                    nextTickLeft = tick.tick(TimeUnit.MILLISECONDS);
                     if (nextTickLeft > 0) {
                         try {
                             tick.wait(nextTickLeft);
