@@ -12,7 +12,7 @@ import java.util.Map;
  * @author aguesuka
  */
 class BencodeEncoder {
-    private Output output;
+    private final Output output;
 
     BencodeEncoder(Output output) {
         this.output = output;

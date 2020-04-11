@@ -9,7 +9,7 @@ import java.util.StringJoiner;
  * 2020/2/19 14:19
  */
 public class SumMap {
-    private Map<String, Data> map = new HashMap<>();
+    final private Map<String, Data> map = new HashMap<>();
 
     public long getCount(String key) {
         return map.get(key).count;

@@ -7,8 +7,8 @@ import java.util.StringJoiner;
  * 2020/2/19 14:30
  */
 public class NumberLogger {
-    private CountMap countMap = new CountMap();
-    private SumMap sumMap = new SumMap();
+    final private CountMap countMap = new CountMap();
+    final private SumMap sumMap = new SumMap();
 
     public CountMap getCountMap() {
         return countMap;

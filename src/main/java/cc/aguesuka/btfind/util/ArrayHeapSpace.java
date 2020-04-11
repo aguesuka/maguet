@@ -12,8 +12,8 @@ import java.util.*;
  */
 public final class ArrayHeapSpace<E> implements Iterable<E> {
     private int size = 0;
-    private ArrayList<E> data;
-    private IntArrayStack readyIndexStack;
+    final private ArrayList<E> data;
+    final private IntArrayStack readyIndexStack;
 
     public ArrayHeapSpace() {
         data = new ArrayList<>();

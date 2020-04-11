@@ -80,7 +80,7 @@ public class IntArrayStack implements Iterable<Integer> {
     public Iterator<Integer> iterator() {
         return new Iterator<>() {
             int remaining = size;
-            int[] array = elements;
+            final int[] array = elements;
 
             @Override
             public boolean hasNext() {

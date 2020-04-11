@@ -8,10 +8,10 @@ import java.util.*;
  * 2019/9/3 20:09
  */
 class BencodeParser {
-    private Map<String, Object> rootMap = new LinkedHashMap<>();
-    private Input input;
+    final private Map<String, Object> rootMap = new LinkedHashMap<>();
+    final private Input input;
     private boolean isReadMap = true;
-    private Deque<Object> stack = new ArrayDeque<>();
+    private final Deque<Object> stack = new ArrayDeque<>();
 
     BencodeParser(Input input) {
         this.input = input;

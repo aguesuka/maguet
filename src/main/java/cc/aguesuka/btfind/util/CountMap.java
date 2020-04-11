@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * 2020/2/19 13:58
  */
 public class CountMap {
-    private Map<String, Long> map = new HashMap<>();
+    final private Map<String, Long> map = new HashMap<>();
 
     public long get(String key) {
         return getOrDefaultZero(key);

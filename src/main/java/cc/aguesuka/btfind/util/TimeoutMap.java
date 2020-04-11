@@ -14,7 +14,7 @@ import java.util.function.BiConsumer;
  * 2020/2/14 10:54
  */
 public class TimeoutMap<K, V> {
-    private Map<K, TimeoutEntry<K, V>> map = new HashMap<>();
+    final private Map<K, TimeoutEntry<K, V>> map = new HashMap<>();
 
     @Override
     public String toString() {

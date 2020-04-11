@@ -32,7 +32,7 @@ public class Bencode {
     }
 
     private static class ByteBufferOutput implements BencodeEncoder.Output {
-        private ByteBuffer buffer;
+        final private ByteBuffer buffer;
 
         private ByteBufferOutput(ByteBuffer buffer) {
             this.buffer = buffer;
@@ -50,7 +50,7 @@ public class Bencode {
     }
 
     private static class ByteArrayOutput implements BencodeEncoder.Output {
-        private ByteArrayOutputStream outputStream;
+        final private ByteArrayOutputStream outputStream;
 
         private ByteArrayOutput(ByteArrayOutputStream outputStream) {
             this.outputStream = outputStream;
@@ -107,7 +107,7 @@ public class Bencode {
     }
 
     private static class ByteBufferInput implements BencodeParser.Input {
-        private ByteBuffer buffer;
+        final private ByteBuffer buffer;
 
         ByteBufferInput(ByteBuffer buffer) {
             this.buffer = buffer;
