@@ -1,5 +1,6 @@
 package cc.aguesuka.maguet.util.timer;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +29,7 @@ public interface Tick<E> {
      *
      * @return expired elements of this duration or empty list
      */
-    List<E> take();
+    Collection<E> take();
 
 
     /**

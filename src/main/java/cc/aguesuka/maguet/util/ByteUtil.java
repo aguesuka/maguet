@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * byte util
+ * Byte util
  *
  * @author aguesuka
  */
