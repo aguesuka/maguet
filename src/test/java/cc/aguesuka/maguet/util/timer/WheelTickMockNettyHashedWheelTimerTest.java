@@ -146,7 +146,7 @@ public class WheelTickMockNettyHashedWheelTimerTest {
     public void testExecutionOnTime() throws InterruptedException {
         int tickDuration = 200;
         for (int timeout : Arrays.asList(0, 62, 125, 250, 500, 1000)) {
-            int maxTimeout = tickDuration * 2 + timeout;
+            int maxTimeout = tickDuration * 3 + timeout;
             final HashedWheelTimer timer = new HashedWheelTimer(tickDuration, TimeUnit.MILLISECONDS);
             final BlockingQueue<Long> queue = new LinkedBlockingQueue<Long>();
 
@@ -163,9 +163,9 @@ public class WheelTickMockNettyHashedWheelTimerTest {
 
             for (int i = 0; i < scheduledTasks; i++) {
                 long delay = queue.take();
-                assertTrue(" Timeout + " + scheduledTasks + " delay " + delay +
-                                " must be " + timeout + " < " + maxTimeout,
-                        delay >= timeout && delay < maxTimeout);
+                assertTrue(" Timeout  " + i + " delay " + delay +
+                                " must be " + timeout + " <= " + delay + " <= " + maxTimeout,
+                        delay >= timeout && delay <= maxTimeout);
             }
 
             timer.stop();
@@ -287,8 +287,8 @@ public class WheelTickMockNettyHashedWheelTimerTest {
 
     private static class HashedWheelTimer implements Timer {
         private final WheelTick<Runnable> tick;
-        private volatile boolean running;
         private final Set<Timeout> timeoutSet = new HashSet<>();
+        private volatile boolean running;
         private long maxPendingTimeouts;
 
         public HashedWheelTimer(
