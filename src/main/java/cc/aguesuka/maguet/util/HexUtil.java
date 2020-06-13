@@ -13,6 +13,7 @@ public final class HexUtil {
 
     private static final char[] B2H;
     private static final byte[] H2B;
+    private final static byte ILLEGAL = -1;
 
     static {
         B2H = new char[16];
@@ -22,7 +23,7 @@ public final class HexUtil {
         char h9 = '9';
         char h10 = 'A';
         char h16 = 'F';
-        byte illegal = -1;
+
         for (char hex = h0; hex <= h9; hex++) {
             B2H[num++] = hex;
         }
@@ -30,7 +31,7 @@ public final class HexUtil {
             B2H[num++] = i;
         }
 
-        Arrays.fill(H2B, illegal);
+        Arrays.fill(H2B, ILLEGAL);
 
         num = 0;
         for (int i = h0; i <= h9; i++) {
@@ -79,7 +80,7 @@ public final class HexUtil {
             throw new IllegalArgumentException();
         }
         byte b = H2B[(byte) c];
-        if (b == -1) {
+        if (b == ILLEGAL) {
             throw new IllegalArgumentException();
         }
         return b;
