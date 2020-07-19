@@ -58,14 +58,25 @@ public class EventLoop implements Closeable {
         return closed;
     }
 
-    private void executeTimeoutTask() {
+    private boolean shouldShutdown() {
         if (closed) {
+            return true;
+        }
+        if (Thread.currentThread().isInterrupted()) {
+            close();
+            return true;
+        }
+        return false;
+    }
+
+    private void executeTimeoutTask() {
+        if (shouldShutdown()) {
             return;
         }
         wheelTick.tick(TIME_UNIT);
         List<Runnable> timeoutTasks = wheelTick.take();
         for (Runnable task : timeoutTasks) {
-            if (closed) {
+            if (shouldShutdown()) {
                 return;
             }
             try {
@@ -77,18 +88,18 @@ public class EventLoop implements Closeable {
         }
     }
 
-    private void doSelect() throws IOException {
-        if (closed) {
+    private void select() throws IOException {
+        if (shouldShutdown()) {
             return;
         }
         long nextTickLeft = wheelTick.tick(TIME_UNIT);
         selector.select(Math.max(0, nextTickLeft));
-        Set<SelectionKey> selectionKeys = selector.selectedKeys();
-        ArrayList<SelectionKey> keys = new ArrayList<>(selectionKeys);
-        selectionKeys.clear();
+        Set<SelectionKey> selectedKeys = selector.selectedKeys();
+        ArrayList<SelectionKey> keys = new ArrayList<>(selectedKeys);
+        selectedKeys.clear();
 
         for (SelectionKey key : keys) {
-            if (closed) {
+            if (shouldShutdown()) {
                 return;
             }
 
@@ -110,9 +121,9 @@ public class EventLoop implements Closeable {
     }
 
     private void run() throws IOException, EventLoopException {
-        while (!closed) {
+        while (!shouldShutdown()) {
             executeTimeoutTask();
-            doSelect();
+            select();
         }
     }
 

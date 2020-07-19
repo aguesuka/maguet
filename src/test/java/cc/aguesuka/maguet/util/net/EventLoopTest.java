@@ -66,6 +66,20 @@ public class EventLoopTest {
         assert error <= EventLoop.TIME_UNIT.toMillis(EventLoop.TICK_DURATION * 2) : error;
     }
 
+    @Test(timeout = 5000L)
+    public void closeByInterrupt() throws IOException {
+        int delay = 1;
+        TimeUnit timeUnit = TimeUnit.SECONDS;
+        EventLoop.start(eventLoop -> {
+            startTime = System.currentTimeMillis();
+            eventLoop.getTimer().createTimeout(() -> Thread.currentThread().interrupt(), delay, timeUnit);
+        });
+        long cost = System.currentTimeMillis() - startTime;
+        long error = cost - timeUnit.toMillis(delay);
+        assert error >= 0 : error;
+        assert error <= EventLoop.TIME_UNIT.toMillis(EventLoop.TICK_DURATION * 2) : error;
+    }
+
     private void readInt(EventLoop eventLoop, Pipe.SourceChannel source, List<Integer> targetList) throws IOException {
         source.configureBlocking(false);
         eventLoop.register(source, SelectionKey.OP_READ, () -> {
