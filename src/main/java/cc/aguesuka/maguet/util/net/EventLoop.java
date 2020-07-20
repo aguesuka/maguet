@@ -10,10 +10,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,19 +38,24 @@ public class EventLoop implements Closeable {
     /**
      * Start with the task, it equals:
      *
-     * @param task task before run
+     * @param stater event loop starter
      * @throws IOException          create {@link Selector} failed
      * @throws NullPointerException task is null;
      * @throws EventLoopException   timeout and attachment not {@link Runnable} or throw exception
      */
-    public static void start(StartTask<EventLoop> task) throws IOException, EventLoopException {
+    public static void start(Stater<EventLoop> stater) throws IOException, EventLoopException {
         try (EventLoop eventLoop = new EventLoop()) {
-            task.run(eventLoop);
+            stater.run(eventLoop);
             eventLoop.run();
-            assert eventLoop.closed;
+            assert eventLoop.closed : "EventLoop not closed";
         }
     }
 
+    /**
+     * Tells whether or not this channel is closed.
+     *
+     * @return true if closed
+     */
     public boolean isClosed() {
         return closed;
     }
@@ -174,28 +176,33 @@ public class EventLoop implements Closeable {
 
         Set<SelectionKey> keys = selector.keys();
         List<SelectionKey> keysCopy = new ArrayList<>(keys);
-        List<IOException> ioExceptionList = new ArrayList<>();
-        try {
-            selector.close();
-        } catch (IOException e) {
-            ioExceptionList.add(e);
-        }
-
+        List<Throwable> ioExceptionList = new ArrayList<>();
+        tryDo(ioExceptionList, selector::selectNow);
+        tryDo(ioExceptionList, selector::close);
         for (SelectionKey key : keysCopy) {
             SelectableChannel channel = key.channel();
-            try {
-                channel.close();
-            } catch (IOException e) {
-                ioExceptionList.add(e);
-            }
+            tryDo(ioExceptionList, channel::close);
         }
         if (!ioExceptionList.isEmpty()) {
             throw new BatchCloseException(ioExceptionList);
         }
     }
 
+    private void tryDo(Collection<? super Throwable> throwableList, ThrowableFunction action) {
+        try {
+            action.run();
+        } catch (Throwable throwable) {
+            throwableList.add(throwable);
+        }
+    }
+
     @FunctionalInterface
-    public interface StartTask<T> {
+    private interface ThrowableFunction {
+        void run() throws Throwable;
+    }
+
+    @FunctionalInterface
+    public interface Stater<T> {
         void run(T t) throws IOException;
     }
 

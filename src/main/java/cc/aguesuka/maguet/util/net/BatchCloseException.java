@@ -1,6 +1,5 @@
 package cc.aguesuka.maguet.util.net;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,14 +10,14 @@ import java.util.List;
  * 2020/6/6 21:04
  */
 public class BatchCloseException extends RuntimeException {
-    private final List<IOException> closeExceptions;
+    private final List<Throwable> closeExceptions;
 
-    public BatchCloseException(List<IOException> closeExceptions) {
+    public BatchCloseException(List<Throwable> closeExceptions) {
         super();
         this.closeExceptions = Collections.unmodifiableList(closeExceptions);
     }
 
-    public List<IOException> getCloseExceptions() {
+    public List<Throwable> getCloseExceptions() {
         return closeExceptions;
     }
 }
