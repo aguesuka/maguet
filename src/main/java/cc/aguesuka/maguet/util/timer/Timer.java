@@ -1,5 +1,6 @@
 package cc.aguesuka.maguet.util.timer;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,4 +19,16 @@ public interface Timer {
      * @return Timeout of this schedules
      */
     Timeout createTimeout(Runnable task, long delay, TimeUnit timeUnit);
+
+    /**
+     * Create timeout by duration
+     *
+     * @param task  task to be scheduled
+     * @param delay delay time
+     * @return Timeout of this schedules
+     * @see #createTimeout(Runnable, long, TimeUnit)
+     */
+    default Timeout createTimeout(Runnable task, Duration delay) {
+        return createTimeout(task, delay.toNanos(), TimeUnit.NANOSECONDS);
+    }
 }
