@@ -69,11 +69,11 @@ public class ArrayHeapSpaceTest {
 
     @Test
     public void spliterator() {
-        long[] ints = LongStream.range(0, 100).map(i -> random.nextInt())
+        long[] intArray = LongStream.range(0, 100).map(i -> random.nextInt())
                 .peek(arrayHeapSpace::add)
                 .toArray();
         long[] arrayHeapSpaceArray =
                 StreamSupport.stream(arrayHeapSpace.spliterator(), false).mapToLong(i -> i).toArray();
-        Assert.assertArrayEquals(ints, arrayHeapSpaceArray);
+        Assert.assertArrayEquals(intArray, arrayHeapSpaceArray);
     }
 }
