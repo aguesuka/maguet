@@ -19,33 +19,32 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
     ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0).flip();
 
     /**
-     * Create instance of TcpClient
+     * Creates an instance of TcpClient
      *
      * @param eventLoop EventLoop
      * @param setting   setting
      * @param <T>       type of setting
      * @return instance of TcpClient
+     * @throws NullPointerException any null argument
      */
     static <T extends TcpClient.Setting> TcpClient<T> of(EventLoop eventLoop, T setting) {
         return new TcpClientImpl<>(eventLoop, setting);
     }
 
     /**
-     * Connect to remote server
+     * Connects to remote server
      *
      * @param address  remote address
      * @param callback callback on connect success
-     * @implNote redirect exception to {@link Setting#handleThrowable(Throwable)}
      */
     void connect(SocketAddress address, Consumer<T> callback);
 
     /**
-     * On connect is readable, read by the buffer, invoke callback unit the
-     * {@code buffer.position >= requireSize}
+     * When connect is readable, reads by buffer, invokes this callback until {@code buffer.position >= targetPosition}
      *
      * @param buffer         nonnull buffer
-     * @param targetPosition {@code 0 < requireSize <= buffer.limit()}
-     * @param callback       callback not null
+     * @param targetPosition the target position， {@code 0 < targetPosition <= buffer.limit()}
+     * @param callback       nonnull callback
      * @throws IllegalArgumentException when {@code  requireSize <=0 || requireSize > buffer.limit()}
      * @throws IllegalStateException    not connect or is closed
      * @throws NullPointerException     any null argument
@@ -53,8 +52,7 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
     void read(ByteBuffer buffer, int targetPosition, Consumer<T> callback);
 
     /**
-     * Bind buffer to this TcpClient, when connect is writeable and the buffer has remaining,
-     * write it.
+     * Binds buffer to this TcpClient, when connect is writeable and has remaining, writes it.
      *
      * @param buffer nonnull buffer
      * @throws NullPointerException  any null argument
@@ -63,7 +61,7 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
     void setWriteBuffer(ByteBuffer buffer);
 
     /**
-     * Set the callback, it will invoke at {@link #setWriteBuffer(ByteBuffer) writeBuffer} has not remaining
+     * Sets the callback, it will invoke at {@link #setWriteBuffer(ByteBuffer) writeBuffer} has not remaining
      *
      * @param callback nullable callback
      * @throws IllegalStateException not connect or is closed
@@ -71,16 +69,14 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
     void onWriteComplete(Consumer<T> callback);
 
     /**
-     * Return true if this closed
+     * Returns true if this closed
      *
      * @return true if this closed
      */
     boolean isClosed();
 
     /**
-     * Close this client
-     *
-     * @implNote redirect exception to {@link Setting#handleThrowable(Throwable)}
+     * Closes this client
      */
     @Override
     void close();
@@ -90,21 +86,24 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
      */
     interface Setting {
         /**
-         * Invoke on client closed
-         *
-         * @implNote don't throw exception
+         * Invokes when client closed
          */
         void onClose();
 
         /**
-         * Async throwable handler
+         * Async throwable will redirect to this method
          *
          * @param throwable throwable
          */
         void handleThrowable(Throwable throwable);
 
         /**
-         * If return true, client will auto close when not set read or write buffer
+         * Invoke when client selected
+         */
+        void onSelected();
+
+        /**
+         * Client will be closed when not set read buffer or write buffer if this returns true
          *
          * @return is auto close on idle
          */
@@ -113,14 +112,14 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
         }
 
         /**
-         * Invoke on read or write result is EOF
+         * Invokes on read or write result is EOF
          *
          * @see #autoCloseOnEof()
          */
         void onEOF();
 
         /**
-         * If return true, client will close before {@link #onEOF()}
+         * If returns true, client will be closed before {@link #onEOF()}
          *
          * @return is auto close on EOF
          * @see #onEOF()

@@ -23,8 +23,8 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
     private int targetPosition;
 
     TcpClientImpl(EventLoop eventLoop, T setting) {
-        this.eventLoop = eventLoop;
-        this.setting = setting;
+        this.eventLoop = Objects.requireNonNull(eventLoop);
+        this.setting = Objects.requireNonNull(setting);
     }
 
     @Override
@@ -77,7 +77,8 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
     /**
      * {@inheritDoc}
      *
-     * @implSpec If client not close but channel is closed or key is canceled, close the client and return true
+     * @implSpec If this not closed but {@link #channel} closed or {@link #key} canceled, closes the client and returns
+     * true
      */
     @Override
     public boolean isClosed() {
@@ -120,19 +121,24 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
     private void onSelected() {
         try {
             assert key.isValid() : "key not valid";
+            setting.onSelected();
+            if (isClosed()) {
+                return;
+            }
             Consumer<T> callback = state.handleSelectedEvent(this);
             while (callback != null) {
                 callback.accept(setting);
-                // maybe close by callback function
+                // maybe closed by callback function
                 if (isClosed()) {
                     return;
                 }
-                // invoke callback outside to avoid stack overflow
+                // invokes callback outside to avoid stack overflow
                 callback = state.moreCallback(this);
             }
             state.updateSelectionKeyOps(this);
-        } catch (Throwable e) {
-            handleThrowable(e);
+        } catch (Throwable throwable) {
+            // redirect throwable
+            handleThrowable(throwable);
         }
     }
 
@@ -198,7 +204,7 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
 
     /**
      * State of client
-     * <pre><b>The State change graph</b>
+     * <pre><b>State change graph</b>
      * (NOT_CONNECT -> CONNECT -> IDLE <-> READ_OR_WRITE ) -> CLOSED
      * </pre>
      */
@@ -294,8 +300,8 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
         }
 
         /**
-         * It invoke once every {@link TcpClientImpl#onSelected()}, to handle the SelectedEvent, return
-         * callback function should been invoke or null if not complete.
+         * Whenever a selected event occurs, and handles the event, then returns the callback function or null if not
+         * complete.
          *
          * @param <T>    type of client setting
          * @param client client instance
