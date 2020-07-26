@@ -6,8 +6,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Timer
  *
- * @author :aguesuka
- * 2020/4/2 18:00
+ * @author aguesuka
  */
 public interface Timer {
     /**
@@ -21,7 +20,7 @@ public interface Timer {
     Timeout createTimeout(Runnable task, long delay, TimeUnit timeUnit);
 
     /**
-     * Create timeout by duration
+     * Creates timeout by duration
      *
      * @param task  task to be scheduled
      * @param delay delay time

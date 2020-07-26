@@ -16,8 +16,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * EventLoop for {@link Selector} and {@link Timer}
  *
- * @author :aguesuka
- * 2020/6/4 18:43
+ * @author aguesuka
  */
 public class EventLoop implements Closeable {
     static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
@@ -52,7 +51,7 @@ public class EventLoop implements Closeable {
     }
 
     /**
-     * Tells whether or not this channel is closed.
+     * Tells whether this channel closed.
      *
      * @return true if closed
      */
@@ -159,8 +158,8 @@ public class EventLoop implements Closeable {
 
     /**
      * Close this EventLoop
-     * <p>If the selector has already been closed then this method returns immediately.
-     * Otherwise clear the {@link Timer} , {@link Selector} and all {@link SelectableChannel} in selector</p>
+     * <p>If the selector has already been closed then this method returns immediately. Otherwise, clear the {@link
+     * Timer} , {@link Selector} and all {@link SelectableChannel} in selector</p>
      *
      * @throws BatchCloseException If close Selector or SelectableChannel failed
      */

@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Throw when close {@link java.io.Closeable} batch has exceptions
+ * Throw by closes {@link java.io.Closeable} batch has exceptions
  *
  * @author :aguesuka
  * 2020/6/6 21:04

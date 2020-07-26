@@ -1,10 +1,9 @@
 package cc.aguesuka.maguet.util.net;
 
 /**
- * Exception of {@link EventLoop}
+ * Exception to {@link EventLoop}
  *
  * @author :aguesuka
- * 2020/6/6 22:44
  */
 public class EventLoopException extends RuntimeException {
     public EventLoopException(String message) {

@@ -1,10 +1,9 @@
 package cc.aguesuka.maguet.util.timer;
 
 /**
- * timeout create by {@link Timer}
+ * Result creates by {@link Timer}
  *
- * @author :aguesuka
- * 2020/4/2 18:00
+ * @author aguesuka
  */
 public interface Timeout {
     /**

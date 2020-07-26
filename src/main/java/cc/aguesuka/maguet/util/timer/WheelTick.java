@@ -10,26 +10,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
 
 /**
- * WheelTick is tick implement by wheel.
+ * WheelTick is tick implement by a wheel.
  * <p>
- * Every {@link #tickDuration} time passed, implicit call {@link #doTick} will take the
- * next cell in {@link #wheel}, and make the elements expired. expired elements can get by {@link #take},
- * expired is not on time: {@code delay <= theActuallyExpiredTime <= delay + tickDuration}.
+ * Every {@link #tickDuration} time passed, implicit call {@link #doTick} will take the next cell in {@link #wheel}, and
+ * make the elements expired. expired elements can get by {@link #take}, expired is not on time: {@code delay <=
+ * theActuallyExpiredTime <= delay + tickDuration}.
  * <p>
- * the operation {@link #doTick} cost linear-time bad, but  cast constant-time average.
- * the operation {@link #add} and  {@link #doCancel}  called {@link #doTick},and cost
- * constant-time average. operation {@link #take} cost constant-time.
+ * the operation {@link #doTick} cost linear-time bad, but  cast constant-time average. the operation {@link #add} and
+ * {@link #doCancel}  called {@link #doTick},and cost constant-time average. operation {@link #take} cost
+ * constant-time.
  *
  * @author :aguesuka
- * 2020/4/8 18:36
  */
 public class WheelTick<E> implements Tick<E> {
     // region setting fields
     final TimeUnit timeUnit;
     final long tickDuration;
     /**
-     * the max time of the delay,
-     * {@code wheelDuration = tickDuration * ticksPerWheel}
+     * the max time of the delay, {@code wheelDuration = tickDuration * ticksPerWheel}
      */
     final long wheelDuration;
     private final int ticksPerWheel;
@@ -49,7 +47,7 @@ public class WheelTick<E> implements Tick<E> {
 
 
     /**
-     * create a wheel tick
+     * Creates a wheel tick
      *
      * @param tickDuration      the tick duration. maxDelayTime = tickDuration * ticksPerWheel.
      * @param timeUnit          the time unit of the {@code tickDuration} and the {@code currentTimeGetter}
@@ -96,7 +94,7 @@ public class WheelTick<E> implements Tick<E> {
     /**
      * {@inheritDoc}
      * <p>
-     * will unlink all {@link WheelTickTimeout}
+     * This will unlink all {@link WheelTickTimeout}
      *
      * @return elements unexpired
      */
@@ -173,7 +171,7 @@ public class WheelTick<E> implements Tick<E> {
     }
 
     /**
-     * take the ready tasks into {@link #readyTaskList}
+     * Takes the ready tasks into {@link #readyTaskList}
      *
      * @return now
      */

@@ -7,17 +7,15 @@ import java.util.concurrent.TimeUnit;
 /**
  * A data structure of save objects with the delay.
  * <p>
- * in which an element can only be taken when it's delay has expired.
- * on every tick, will check if there are any element behind the schedule
- * and make it expire.
+ * in which an element can only be taken when it's delay has expired. on every tick, will check if there are any element
+ * behind the schedule and make it expire.
  *
  * @param <E> type of elements
- * @author :aguesuka
- * 2020/4/5 12:59
+ * @author aguesuka
  */
 public interface Tick<E> {
     /**
-     * clear all unexpired elements
+     * Clear all unexpired elements
      *
      * @return unexpired elements
      */
@@ -25,7 +23,7 @@ public interface Tick<E> {
 
 
     /**
-     * get expired elements, call {@link #tick} before take
+     * Gets expired elements, call {@link #tick} before take
      *
      * @return expired elements of this duration or empty list
      */
@@ -33,7 +31,7 @@ public interface Tick<E> {
 
 
     /**
-     * tick if now >= nextTickTime, return next tick time left
+     * Ticks if now >= nextTickTime, return next tick time left
      *
      * @param timeUnit timeUnit of result
      * @return next tick time  - now
@@ -41,14 +39,14 @@ public interface Tick<E> {
     long tick(TimeUnit timeUnit);
 
     /**
-     * get size of unexpired elements
+     * Gets size of unexpired elements
      *
      * @return size
      */
     int unexpiredSize();
 
     /**
-     * add the element with delay
+     * Adds the element with delay
      *
      * @param element  the element
      * @param delay    delay time
