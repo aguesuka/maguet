@@ -77,7 +77,7 @@ public class TcpConnectImpl<T extends TcpConnect.Setting> implements TcpConnect<
     /**
      * {@inheritDoc}
      *
-     * @implSpec If this not closed but {@link #channel} closed or {@link #key} canceled, closes the client and returns
+     * @implSpec If this not closed but {@link #channel} closed or {@link #key} canceled, closes this and returns
      * true
      */
     @Override
@@ -203,7 +203,7 @@ public class TcpConnectImpl<T extends TcpConnect.Setting> implements TcpConnect<
     }
 
     /**
-     * State of client
+     * State of connect
      * <pre><b>State change graph</b>
      * (NOT_CONNECT -> CONNECT -> IDLE <-> READ_OR_WRITE ) -> CLOSED
      * </pre>
@@ -213,20 +213,20 @@ public class TcpConnectImpl<T extends TcpConnect.Setting> implements TcpConnect<
 
         CONNECT {
             @Override
-            <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectImpl<T> client) throws Exception {
-                assert client.key.isValid() : "key not valid";
-                assert client.key.isConnectable() : "key not connectable";
-                assert client.channel.isOpen() : "channel not open";
+            <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectImpl<T> connect) throws Exception {
+                assert connect.key.isValid() : "key not valid";
+                assert connect.key.isConnectable() : "key not connectable";
+                assert connect.channel.isOpen() : "channel not open";
 
 
-                boolean connectSuccess = client.channel.finishConnect();
+                boolean connectSuccess = connect.channel.finishConnect();
                 assert connectSuccess : "connect fail";
 
-                Consumer<T> callback = client.connectCallback;
+                Consumer<T> callback = connect.connectCallback;
                 assert callback != null;
 
-                client.connectCallback = null;
-                client.changeState(IDLE);
+                connect.connectCallback = null;
+                connect.changeState(IDLE);
 
                 return callback;
             }
@@ -234,16 +234,16 @@ public class TcpConnectImpl<T extends TcpConnect.Setting> implements TcpConnect<
 
         IDLE {
             @Override
-            <T extends Setting> void updateSelectionKeyOps(TcpConnectImpl<T> client) {
-                if (client.setting.autoCloseOnIdle()) {
-                    client.close();
+            <T extends Setting> void updateSelectionKeyOps(TcpConnectImpl<T> connect) {
+                if (connect.setting.autoCloseOnIdle()) {
+                    connect.close();
                 } else {
-                    client.key.interestOps(0);
+                    connect.key.interestOps(0);
                 }
             }
 
             @Override
-            <T extends Setting> Consumer<T> moreCallback(TcpConnectImpl<T> client) {
+            <T extends Setting> Consumer<T> moreCallback(TcpConnectImpl<T> connect) {
                 return null;
             }
 
@@ -254,34 +254,34 @@ public class TcpConnectImpl<T extends TcpConnect.Setting> implements TcpConnect<
 
         READ_OR_WRITE {
             @Override
-            <T extends Setting> void updateSelectionKeyOps(TcpConnectImpl<T> client) {
+            <T extends Setting> void updateSelectionKeyOps(TcpConnectImpl<T> connect) {
                 int ops = 0;
-                if (client.readCallback != null) {
+                if (connect.readCallback != null) {
                     ops |= SelectionKey.OP_READ;
                 }
-                if (client.writeBuffer != null && client.writeBuffer.hasRemaining()) {
+                if (connect.writeBuffer != null && connect.writeBuffer.hasRemaining()) {
                     ops |= SelectionKey.OP_WRITE;
                 }
                 if (ops == 0) {
-                    client.changeState(IDLE);
-                    IDLE.updateSelectionKeyOps(client);
+                    connect.changeState(IDLE);
+                    IDLE.updateSelectionKeyOps(connect);
                 } else {
-                    client.key.interestOps(ops);
+                    connect.key.interestOps(ops);
                 }
             }
 
             @Override
-            <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectImpl<T> client) throws Exception {
-                return client.handleReadOrWriteSelectedEvent();
+            <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectImpl<T> connect) throws Exception {
+                return connect.handleReadOrWriteSelectedEvent();
             }
 
             @Override
-            <T extends Setting> Consumer<T> moreCallback(TcpConnectImpl<T> client) {
-                Consumer<T> readCallback = client.getReadCallbackIfComplete();
+            <T extends Setting> Consumer<T> moreCallback(TcpConnectImpl<T> connect) {
+                Consumer<T> readCallback = connect.getReadCallbackIfComplete();
                 if (readCallback != null) {
                     return readCallback;
                 }
-                return client.getWriteCallbackIfComplete();
+                return connect.getWriteCallbackIfComplete();
             }
 
             @Override
@@ -295,7 +295,7 @@ public class TcpConnectImpl<T extends TcpConnect.Setting> implements TcpConnect<
         /**
          * Update {@link SelectionKey#interestOps()} after handle SelectedEvent
          */
-        <T extends Setting> void updateSelectionKeyOps(TcpConnectImpl<T> client) {
+        <T extends Setting> void updateSelectionKeyOps(TcpConnectImpl<T> connect) {
             throw new IllegalStateException(this.name());
         }
 
@@ -303,11 +303,11 @@ public class TcpConnectImpl<T extends TcpConnect.Setting> implements TcpConnect<
          * Whenever a selected event occurs, and handles the event, then returns the callback function or null if not
          * complete.
          *
-         * @param <T>    type of client setting
-         * @param client client instance
+         * @param <T>    type of connect setting
+         * @param connect connect instance
          * @return callback should invoke, or {@code null} if not have
          */
-        <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectImpl<T> client) throws Exception {
+        <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectImpl<T> connect) throws Exception {
             throw new IllegalStateException(this.name());
         }
 
@@ -316,7 +316,7 @@ public class TcpConnectImpl<T extends TcpConnect.Setting> implements TcpConnect<
          *
          * @return callback should invoke, or {@code null} if not have
          */
-        <T extends Setting> Consumer<T> moreCallback(TcpConnectImpl<T> client) {
+        <T extends Setting> Consumer<T> moreCallback(TcpConnectImpl<T> connect) {
             throw new IllegalStateException(this.name());
         }
 
