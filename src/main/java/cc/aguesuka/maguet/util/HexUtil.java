@@ -54,7 +54,7 @@ public final class HexUtil {
     }
 
     /**
-     * hex to bytes
+     * Hex to bytes
      *
      * @param hex hex string
      * @return byte array
@@ -87,7 +87,7 @@ public final class HexUtil {
     }
 
     /**
-     * bytes to hex
+     * Bytes to hex
      *
      * @param bytes byte array
      * @return hex string

@@ -3,17 +3,16 @@ package cc.aguesuka.maguet.util;
 import java.util.*;
 
 /**
- * a data struct {@link #add} return the index and can {@link #remove(int, E)}  by index.
- * element is null null. keep every element not equals other.
+ * A data structure, this can {@link #add(E element) add} return the index, and {@link #remove(int, E) remove}  by
+ * index. element is nonnull. keep elements not equals each other.
  *
  * @param <E> element type
- * @author :aguesuka
- * 2019/12/28 15:25
+ * @author aguesuka
  */
 public final class ArrayHeapSpace<E> implements Iterable<E> {
-    private int size = 0;
     final private ArrayList<E> data;
     final private IntArrayStack readyIndexStack;
+    private int size = 0;
 
     public ArrayHeapSpace() {
         data = new ArrayList<>();

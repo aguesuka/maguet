@@ -3,10 +3,9 @@ package cc.aguesuka.maguet.util;
 import java.util.*;
 
 /**
- * warp int array as a stack
+ * An int stack implements by an int array
  *
- * @author :aguesuka
- * 2020/4/1 18:33
+ * @author aguesuka
  */
 public class IntArrayStack implements Iterable<Integer> {
     private static final int DEFAULT_SIZE = 16;
@@ -31,7 +30,7 @@ public class IntArrayStack implements Iterable<Integer> {
     }
 
     /**
-     * add at last
+     * Adds at last
      *
      * @param i an int
      */
@@ -44,9 +43,9 @@ public class IntArrayStack implements Iterable<Integer> {
     }
 
     /**
-     * get last value
+     * Remove and returns the last element
      *
-     * @return last value
+     * @return last element
      */
     public int pop() {
         if (size <= 0) {
@@ -57,16 +56,16 @@ public class IntArrayStack implements Iterable<Integer> {
     }
 
     /**
-     * remove all value
+     * Removes all value
      */
     public void clear() {
         size = 0;
     }
 
     /**
-     * get size
+     * Returns the elements count
      *
-     * @return size
+     * @return elements count
      */
     public int size() {
         return size;
@@ -79,8 +78,8 @@ public class IntArrayStack implements Iterable<Integer> {
     @Override
     public Iterator<Integer> iterator() {
         return new Iterator<>() {
-            int remaining = size;
             final int[] array = elements;
+            int remaining = size;
 
             @Override
             public boolean hasNext() {
