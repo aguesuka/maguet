@@ -7,7 +7,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> {
+public class TcpConnectImpl<T extends TcpConnect.Setting> implements TcpConnect<T> {
 
     private static final int EOF = -1;
     private final EventLoop eventLoop;
@@ -22,7 +22,7 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
     private ByteBuffer readBuffer;
     private int targetPosition;
 
-    TcpClientImpl(EventLoop eventLoop, T setting) {
+    TcpConnectImpl(EventLoop eventLoop, T setting) {
         this.eventLoop = Objects.requireNonNull(eventLoop);
         this.setting = Objects.requireNonNull(setting);
     }
@@ -213,7 +213,7 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
 
         CONNECT {
             @Override
-            <T extends Setting> Consumer<T> handleSelectedEvent(TcpClientImpl<T> client) throws Exception {
+            <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectImpl<T> client) throws Exception {
                 assert client.key.isValid() : "key not valid";
                 assert client.key.isConnectable() : "key not connectable";
                 assert client.channel.isOpen() : "channel not open";
@@ -234,7 +234,7 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
 
         IDLE {
             @Override
-            <T extends Setting> void updateSelectionKeyOps(TcpClientImpl<T> client) {
+            <T extends Setting> void updateSelectionKeyOps(TcpConnectImpl<T> client) {
                 if (client.setting.autoCloseOnIdle()) {
                     client.close();
                 } else {
@@ -243,7 +243,7 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
             }
 
             @Override
-            <T extends Setting> Consumer<T> moreCallback(TcpClientImpl<T> client) {
+            <T extends Setting> Consumer<T> moreCallback(TcpConnectImpl<T> client) {
                 return null;
             }
 
@@ -254,7 +254,7 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
 
         READ_OR_WRITE {
             @Override
-            <T extends Setting> void updateSelectionKeyOps(TcpClientImpl<T> client) {
+            <T extends Setting> void updateSelectionKeyOps(TcpConnectImpl<T> client) {
                 int ops = 0;
                 if (client.readCallback != null) {
                     ops |= SelectionKey.OP_READ;
@@ -271,12 +271,12 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
             }
 
             @Override
-            <T extends Setting> Consumer<T> handleSelectedEvent(TcpClientImpl<T> client) throws Exception {
+            <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectImpl<T> client) throws Exception {
                 return client.handleReadOrWriteSelectedEvent();
             }
 
             @Override
-            <T extends Setting> Consumer<T> moreCallback(TcpClientImpl<T> client) {
+            <T extends Setting> Consumer<T> moreCallback(TcpConnectImpl<T> client) {
                 Consumer<T> readCallback = client.getReadCallbackIfComplete();
                 if (readCallback != null) {
                     return readCallback;
@@ -295,7 +295,7 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
         /**
          * Update {@link SelectionKey#interestOps()} after handle SelectedEvent
          */
-        <T extends Setting> void updateSelectionKeyOps(TcpClientImpl<T> client) {
+        <T extends Setting> void updateSelectionKeyOps(TcpConnectImpl<T> client) {
             throw new IllegalStateException(this.name());
         }
 
@@ -307,7 +307,7 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
          * @param client client instance
          * @return callback should invoke, or {@code null} if not have
          */
-        <T extends Setting> Consumer<T> handleSelectedEvent(TcpClientImpl<T> client) throws Exception {
+        <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectImpl<T> client) throws Exception {
             throw new IllegalStateException(this.name());
         }
 
@@ -316,7 +316,7 @@ public class TcpClientImpl<T extends TcpClient.Setting> implements TcpClient<T> 
          *
          * @return callback should invoke, or {@code null} if not have
          */
-        <T extends Setting> Consumer<T> moreCallback(TcpClientImpl<T> client) {
+        <T extends Setting> Consumer<T> moreCallback(TcpConnectImpl<T> client) {
             throw new IllegalStateException(this.name());
         }
 

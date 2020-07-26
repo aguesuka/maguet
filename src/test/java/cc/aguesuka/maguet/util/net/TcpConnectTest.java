@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class TcpClientTest {
+public class TcpConnectTest {
     private static final int PORT = 18888;
     private static final int BUFFER_SIZE = 10;
     private ServerSocket serverSocket;
@@ -52,36 +52,36 @@ public class TcpClientTest {
 
 
     /**
-     * Creates EventLoop then create TcpClient, then invoke action. complete until {@link TcpClient#close()} has been
+     * Creates EventLoop then create TcpConnect, then invoke action. complete until {@link TcpConnect#close()} has been
      * called.
      */
-    private void withClient(Consumer<TcpClient<?>> action) throws IOException {
+    private void withConnect(Consumer<TcpConnect<?>> action) throws IOException {
         withEchoServer((eventLoop, address) -> {
-            TcpClient<?> client = TcpClient.of(eventLoop, new PrintSetting(eventLoop));
-            client.connect(address, setting -> action.accept(client));
+            TcpConnect<?> connect = TcpConnect.of(eventLoop, new PrintSetting(eventLoop));
+            connect.connect(address, setting -> action.accept(connect));
         });
     }
 
     @Test(timeout = 1000)
     public void testConnect() throws IOException {
-        withClient(TcpClient::close);
+        withConnect(TcpConnect::close);
     }
 
     @Test(timeout = 1000)
     public void testWriteThenReadByEchoServer() throws IOException {
-        withClient(client -> {
+        withConnect(connect -> {
             byte[] message = "testWriteThenReadByEchoServer".getBytes(StandardCharsets.UTF_8);
             int messageLength = message.length;
             ByteBuffer buffer = ByteBuffer.allocate(messageLength);
-            client.setWriteBuffer(ByteBuffer.wrap(message));
-            client.onWriteComplete(ws -> client.read(buffer, messageLength, rs -> {
+            connect.setWriteBuffer(ByteBuffer.wrap(message));
+            connect.onWriteComplete(ws -> connect.read(buffer, messageLength, rs -> {
                 Assert.assertArrayEquals(buffer.array(), message);
-                client.close();
+                connect.close();
             }));
         });
     }
 
-    private static class PrintSetting implements TcpClient.Setting {
+    private static class PrintSetting implements TcpConnect.Setting {
 
         private final EventLoop eventLoop;
 
@@ -96,7 +96,7 @@ public class TcpClientTest {
 
         @Override
         public void handleThrowable(Throwable throwable) {
-            System.out.println("TcpClientTest.handleThrowable");
+            System.out.println("TcpConnectTest.handleThrowable");
             throwable.printStackTrace();
             Assert.fail(throwable.getMessage());
         }

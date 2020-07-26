@@ -7,28 +7,28 @@ import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
 /**
- * Tcp client
+ * Tcp connect
  *
  * @param <T> type of setting
  * @author agueuska
  */
-public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
+public interface TcpConnect<T extends TcpConnect.Setting> extends Closeable {
     /**
      * Empty byte buffer
      */
     ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0).flip();
 
     /**
-     * Creates an instance of TcpClient
+     * Creates an instance of TcpConnect
      *
      * @param eventLoop EventLoop
      * @param setting   setting
      * @param <T>       type of setting
-     * @return instance of TcpClient
+     * @return instance of TcpConnect
      * @throws NullPointerException any null argument
      */
-    static <T extends TcpClient.Setting> TcpClient<T> of(EventLoop eventLoop, T setting) {
-        return new TcpClientImpl<>(eventLoop, setting);
+    static <T extends TcpConnect.Setting> TcpConnect<T> of(EventLoop eventLoop, T setting) {
+        return new TcpConnectImpl<>(eventLoop, setting);
     }
 
     /**
@@ -52,7 +52,7 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
     void read(ByteBuffer buffer, int targetPosition, Consumer<T> callback);
 
     /**
-     * Binds buffer to this TcpClient, when connect is writeable and has remaining, writes it.
+     * Binds buffer to this TcpConnect, when connect is writeable and has remaining, writes it.
      *
      * @param buffer nonnull buffer
      * @throws NullPointerException  any null argument
@@ -76,17 +76,17 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
     boolean isClosed();
 
     /**
-     * Closes this client
+     * Closes this connect
      */
     @Override
     void close();
 
     /**
-     * The setting of client
+     * The setting of connect
      */
     interface Setting {
         /**
-         * Invokes when client closed
+         * Invokes when connect closed
          */
         void onClose();
 
@@ -98,12 +98,12 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
         void handleThrowable(Throwable throwable);
 
         /**
-         * Invoke when client selected
+         * Invoke when connect selected
          */
         void onSelected();
 
         /**
-         * Client will be closed when not set read buffer or write buffer if this returns true
+         * Connect will be closed when not set read buffer or write buffer if this returns true
          *
          * @return is auto close on idle
          */
@@ -119,7 +119,7 @@ public interface TcpClient<T extends TcpClient.Setting> extends Closeable {
         void onEOF();
 
         /**
-         * If returns true, client will be closed before {@link #onEOF()}
+         * If returns true, Connect will be closed before {@link #onEOF()}
          *
          * @return is auto close on EOF
          * @see #onEOF()
