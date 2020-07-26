@@ -187,7 +187,7 @@ public class EventLoop implements Closeable {
         }
     }
 
-    private void tryDo(Collection<? super Throwable> throwableList, ThrowableFunction action) {
+    private void tryDo(Collection<? super Throwable> throwableList, ThrowableRunnable action) {
         try {
             action.run();
         } catch (Throwable throwable) {
@@ -196,7 +196,7 @@ public class EventLoop implements Closeable {
     }
 
     @FunctionalInterface
-    private interface ThrowableFunction {
+    private interface ThrowableRunnable {
         void run() throws Throwable;
     }
 
