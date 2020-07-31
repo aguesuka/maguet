@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class TcpConnectTest {
+public class TcpConnectionTest {
     private static final int PORT = 18888;
     private static final int BUFFER_SIZE = 10;
     private ServerSocket serverSocket;
@@ -52,19 +52,19 @@ public class TcpConnectTest {
 
 
     /**
-     * Creates EventLoop then create TcpConnect, then invoke action. complete until {@link TcpConnect#close()} has been
+     * Creates EventLoop then create TcpConnect, then invoke action. complete until {@link TcpConnection#close()} has been
      * called.
      */
-    private void withConnect(Consumer<TcpConnect<?>> action) throws IOException {
+    private void withConnect(Consumer<TcpConnection<?>> action) throws IOException {
         withEchoServer((eventLoop, address) -> {
-            TcpConnect<?> connect = TcpConnect.of(eventLoop, new PrintSetting(eventLoop));
+            TcpConnection<?> connect = TcpConnection.of(eventLoop, new PrintSetting(eventLoop));
             connect.connect(address, setting -> action.accept(connect));
         });
     }
 
     @Test(timeout = 1000)
     public void testConnect() throws IOException {
-        withConnect(TcpConnect::close);
+        withConnect(TcpConnection::close);
     }
 
     @Test(timeout = 1000)
@@ -81,7 +81,7 @@ public class TcpConnectTest {
         });
     }
 
-    private static class PrintSetting implements TcpConnect.Setting {
+    private static class PrintSetting implements TcpConnection.Setting {
 
         private final EventLoop eventLoop;
 
