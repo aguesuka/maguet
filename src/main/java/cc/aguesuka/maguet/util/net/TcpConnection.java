@@ -9,10 +9,10 @@ import java.util.function.Consumer;
 /**
  * Tcp connect
  *
- * @param <T> type of setting
+ * @param <T> type of observer
  * @author agueuska
  */
-public interface TcpConnection<T extends TcpConnection.Setting> extends Closeable {
+public interface TcpConnection<T extends TcpConnection.Observer> extends Closeable {
     /**
      * Empty byte buffer
      */
@@ -22,13 +22,13 @@ public interface TcpConnection<T extends TcpConnection.Setting> extends Closeabl
      * Creates an instance of TcpConnect
      *
      * @param eventLoop EventLoop
-     * @param setting   setting
-     * @param <T>       type of setting
+     * @param observer   observer
+     * @param <T>       type of observer
      * @return instance of TcpConnect
      * @throws NullPointerException any null argument
      */
-    static <T extends TcpConnection.Setting> TcpConnection<T> of(EventLoop eventLoop, T setting) {
-        return new TcpConnectionImpl<>(eventLoop, setting);
+    static <T extends Observer> TcpConnection<T> of(EventLoop eventLoop, T observer) {
+        return new TcpConnectionImpl<>(eventLoop, observer);
     }
 
     /**
@@ -82,9 +82,9 @@ public interface TcpConnection<T extends TcpConnection.Setting> extends Closeabl
     void close();
 
     /**
-     * The setting of connect
+     * The observer of connect
      */
-    interface Setting {
+    interface Observer {
         /**
          * Invokes when connect closed
          */

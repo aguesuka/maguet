@@ -58,8 +58,8 @@ public class TcpConnectionTest {
      */
     private void withConnect(Consumer<TcpConnection<?>> action) throws IOException {
         withEventLoop((eventLoop, address) -> {
-            TcpConnection<?> connect = TcpConnection.of(eventLoop, new PrintSetting(eventLoop));
-            connect.connect(address, setting -> action.accept(connect));
+            TcpConnection<?> connect = TcpConnection.of(eventLoop, new PrintObserver(eventLoop));
+            connect.connect(address, observer -> action.accept(connect));
         });
     }
 
@@ -84,12 +84,12 @@ public class TcpConnectionTest {
 
     @Test(timeout = 1000)
     public void testAutoCloseOnThrowException() throws IOException {
-        withEventLoop((eventLoop, address) -> new PrintSetting(eventLoop) {
+        withEventLoop((eventLoop, address) -> new PrintObserver(eventLoop) {
             final TcpConnection<?> connect;
             RuntimeException exception;
             {
                 connect = TcpConnection.of(eventLoop, this);
-                connect.connect(address, setting -> {
+                connect.connect(address, observer -> {
                     exception = new RuntimeException();
                     throw exception;
                 });
@@ -105,17 +105,17 @@ public class TcpConnectionTest {
         });
     }
 
-    private static class PrintSetting implements TcpConnection.Setting {
+    private static class PrintObserver implements TcpConnection.Observer {
 
         private final EventLoop eventLoop;
 
-        public PrintSetting(EventLoop eventLoop) {
+        public PrintObserver(EventLoop eventLoop) {
             this.eventLoop = eventLoop;
         }
 
         @Override
         public void onClose() {
-            System.out.println("PrintSetting.onClose");
+            System.out.println("Printobserver.onClose");
             eventLoop.close();
         }
 
@@ -128,12 +128,12 @@ public class TcpConnectionTest {
 
         @Override
         public void onSelected() {
-            System.out.println("PrintSetting.onSelected");
+            System.out.println("Printobserver.onSelected");
         }
 
         @Override
         public void onEOF() {
-            System.out.println("PrintSetting.onEOF");
+            System.out.println("Printobserver.onEOF");
         }
     }
 

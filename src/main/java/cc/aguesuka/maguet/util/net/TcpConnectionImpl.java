@@ -7,11 +7,11 @@ import java.nio.channels.SocketChannel;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpConnection<T> {
+public class TcpConnectionImpl<T extends TcpConnection.Observer> implements TcpConnection<T> {
 
     private static final int EOF = -1;
     private final EventLoop eventLoop;
-    private final T setting;
+    private final T observer;
     private SelectionKey key;
     private SocketChannel channel;
     private State state;
@@ -22,9 +22,9 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
     private ByteBuffer readBuffer;
     private int targetPosition;
 
-    TcpConnectionImpl(EventLoop eventLoop, T setting) {
+    TcpConnectionImpl(EventLoop eventLoop, T observer) {
         this.eventLoop = Objects.requireNonNull(eventLoop);
-        this.setting = Objects.requireNonNull(setting);
+        this.observer = Objects.requireNonNull(observer);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
             this.connectCallback = callback;
             changeState(State.CONNECT);
         } catch (Throwable e) {
-            setting.handleThrowable(e);
+            observer.handleThrowable(e);
         }
     }
 
@@ -91,7 +91,7 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
         }
 
         if (!key.isValid() || !channel.isOpen()) {
-            setting.onClose();
+            observer.onClose();
             return true;
         }
         return false;
@@ -111,9 +111,9 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
         }
         try {
             channel.close();
-            setting.onClose();
+            observer.onClose();
         } catch (Throwable e) {
-            setting.handleThrowable(e);
+            observer.handleThrowable(e);
         }
     }
 
@@ -121,13 +121,13 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
     private void onSelected() {
         try {
             assert key.isValid() : "key not valid";
-            setting.onSelected();
+            observer.onSelected();
             if (isClosed()) {
                 return;
             }
             Consumer<T> callback = state.handleSelectedEvent(this);
             while (callback != null) {
-                callback.accept(setting);
+                callback.accept(observer);
                 // maybe closed by callback function
                 if (isClosed()) {
                     return;
@@ -143,10 +143,10 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
     }
 
     private void onEOF() {
-        if (setting.autoCloseOnEof()) {
+        if (observer.autoCloseOnEof()) {
             close();
         }
-        setting.onEOF();
+        observer.onEOF();
     }
 
     private Consumer<T> getReadCallbackIfComplete() {
@@ -194,7 +194,7 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
 
     private void handleThrowable(Throwable throwable) {
         close();
-        setting.handleThrowable(throwable);
+        observer.handleThrowable(throwable);
     }
 
     private void changeState(State state) {
@@ -212,7 +212,7 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
 
         CONNECT {
             @Override
-            <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectionImpl<T> connect) throws Exception {
+            <T extends Observer> Consumer<T> handleSelectedEvent(TcpConnectionImpl<T> connect) throws Exception {
                 assert connect.key.isValid() : "key not valid";
                 assert connect.key.isConnectable() : "key not connectable";
                 assert connect.channel.isOpen() : "channel not open";
@@ -233,8 +233,8 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
 
         IDLE {
             @Override
-            <T extends Setting> void updateSelectionKeyOps(TcpConnectionImpl<T> connect) {
-                if (connect.setting.autoCloseOnIdle()) {
+            <T extends Observer> void updateSelectionKeyOps(TcpConnectionImpl<T> connect) {
+                if (connect.observer.autoCloseOnIdle()) {
                     connect.close();
                 } else {
                     connect.key.interestOps(0);
@@ -242,7 +242,7 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
             }
 
             @Override
-            <T extends Setting> Consumer<T> moreCallback(TcpConnectionImpl<T> connect) {
+            <T extends Observer> Consumer<T> moreCallback(TcpConnectionImpl<T> connect) {
                 return null;
             }
 
@@ -253,7 +253,7 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
 
         READ_OR_WRITE {
             @Override
-            <T extends Setting> void updateSelectionKeyOps(TcpConnectionImpl<T> connect) {
+            <T extends Observer> void updateSelectionKeyOps(TcpConnectionImpl<T> connect) {
                 int ops = 0;
                 if (connect.readCallback != null) {
                     ops |= SelectionKey.OP_READ;
@@ -270,12 +270,12 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
             }
 
             @Override
-            <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectionImpl<T> connect) throws Exception {
+            <T extends Observer> Consumer<T> handleSelectedEvent(TcpConnectionImpl<T> connect) throws Exception {
                 return connect.handleReadOrWriteSelectedEvent();
             }
 
             @Override
-            <T extends Setting> Consumer<T> moreCallback(TcpConnectionImpl<T> connect) {
+            <T extends Observer> Consumer<T> moreCallback(TcpConnectionImpl<T> connect) {
                 Consumer<T> readCallback = connect.getReadCallbackIfComplete();
                 if (readCallback != null) {
                     return readCallback;
@@ -294,7 +294,7 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
         /**
          * Update {@link SelectionKey#interestOps()} after handle SelectedEvent
          */
-        <T extends Setting> void updateSelectionKeyOps(TcpConnectionImpl<T> connect) {
+        <T extends Observer> void updateSelectionKeyOps(TcpConnectionImpl<T> connect) {
             throw new IllegalStateException(this.name());
         }
 
@@ -302,11 +302,11 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
          * Whenever a selected event occurs, and handles the event, then returns the callback function or null if not
          * complete.
          *
-         * @param <T>    type of connect setting
+         * @param <T>    type of connect observer
          * @param connect connect instance
          * @return callback should invoke, or {@code null} if not have
          */
-        <T extends Setting> Consumer<T> handleSelectedEvent(TcpConnectionImpl<T> connect) throws Exception {
+        <T extends Observer> Consumer<T> handleSelectedEvent(TcpConnectionImpl<T> connect) throws Exception {
             throw new IllegalStateException(this.name());
         }
 
@@ -315,7 +315,7 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
          *
          * @return callback should invoke, or {@code null} if not have
          */
-        <T extends Setting> Consumer<T> moreCallback(TcpConnectionImpl<T> connect) {
+        <T extends Observer> Consumer<T> moreCallback(TcpConnectionImpl<T> connect) {
             throw new IllegalStateException(this.name());
         }
 
