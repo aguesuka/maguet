@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.Pipe;
 import java.nio.channels.SelectionKey;
 import java.util.ArrayList;
@@ -121,7 +122,7 @@ public class EventLoopTest {
 
         EventLoop.start(eventLoop -> {
             this.eventLoop = eventLoop;
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < pipeList.size(); i++) {
                 Pipe pipe = Pipe.open();
                 pipeList.add(pipe);
                 readInt(eventLoop, pipe.source(), integerList);
