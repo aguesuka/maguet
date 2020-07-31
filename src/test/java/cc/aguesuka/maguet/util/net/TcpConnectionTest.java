@@ -25,6 +25,7 @@ public class TcpConnectionTest {
     /** Creates server socket and starts the {@link EchoServerThread} */
     @Before
     public void initServerSocket() throws IOException {
+        System.out.println("TcpConnectionTest.initServerSocket");
         serverSocket = new ServerSocket();
         address = new InetSocketAddress(PORT);
         serverSocket.bind(address);
@@ -46,17 +47,17 @@ public class TcpConnectionTest {
         }
     }
 
-    private void withEchoServer(BiConsumer<EventLoop, SocketAddress> action) throws IOException {
+    private void withEventLoop(BiConsumer<EventLoop, SocketAddress> action) throws IOException {
         EventLoop.start(eventLoop -> action.accept(eventLoop, address));
     }
 
 
     /**
-     * Creates EventLoop then create TcpConnect, then invoke action. complete until {@link TcpConnection#close()} has been
-     * called.
+     * Creates EventLoop then create TcpConnect, then invoke action. complete until {@link TcpConnection#close()} has
+     * been called.
      */
     private void withConnect(Consumer<TcpConnection<?>> action) throws IOException {
-        withEchoServer((eventLoop, address) -> {
+        withEventLoop((eventLoop, address) -> {
             TcpConnection<?> connect = TcpConnection.of(eventLoop, new PrintSetting(eventLoop));
             connect.connect(address, setting -> action.accept(connect));
         });
@@ -69,15 +70,38 @@ public class TcpConnectionTest {
 
     @Test(timeout = 1000)
     public void testWriteThenReadByEchoServer() throws IOException {
-        withConnect(connect -> {
+        withConnect(connection -> {
             byte[] message = "testWriteThenReadByEchoServer".getBytes(StandardCharsets.UTF_8);
             int messageLength = message.length;
             ByteBuffer buffer = ByteBuffer.allocate(messageLength);
-            connect.setWriteBuffer(ByteBuffer.wrap(message));
-            connect.onWriteComplete(ws -> connect.read(buffer, messageLength, rs -> {
+            connection.setWriteBuffer(ByteBuffer.wrap(message));
+            connection.onWriteComplete(ws -> connection.read(buffer, messageLength, rs -> {
                 Assert.assertArrayEquals(buffer.array(), message);
-                connect.close();
+                connection.close();
             }));
+        });
+    }
+
+    @Test(timeout = 1000)
+    public void testAutoCloseOnThrowException() throws IOException {
+        withEventLoop((eventLoop, address) -> new PrintSetting(eventLoop) {
+            final TcpConnection<?> connect;
+            RuntimeException exception;
+            {
+                connect = TcpConnection.of(eventLoop, this);
+                connect.connect(address, setting -> {
+                    exception = new RuntimeException();
+                    throw exception;
+                });
+            }
+
+            @Override
+            public void handleThrowable(Throwable throwable) {
+                System.out.println("TcpConnectionTest.handleThrowable");
+                assert null != exception;
+                assert exception == throwable;
+                assert connect.isClosed();
+            }
         });
     }
 
@@ -91,6 +115,7 @@ public class TcpConnectionTest {
 
         @Override
         public void onClose() {
+            System.out.println("PrintSetting.onClose");
             eventLoop.close();
         }
 
@@ -103,10 +128,12 @@ public class TcpConnectionTest {
 
         @Override
         public void onSelected() {
+            System.out.println("PrintSetting.onSelected");
         }
 
         @Override
         public void onEOF() {
+            System.out.println("PrintSetting.onEOF");
         }
     }
 

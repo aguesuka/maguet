@@ -195,7 +195,6 @@ public class TcpConnectionImpl<T extends TcpConnection.Setting> implements TcpCo
     private void handleThrowable(Throwable throwable) {
         close();
         setting.handleThrowable(throwable);
-        setting.onClose();
     }
 
     private void changeState(State state) {
