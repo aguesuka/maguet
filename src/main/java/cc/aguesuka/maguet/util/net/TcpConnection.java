@@ -12,7 +12,7 @@ import java.util.function.Consumer;
  * @param <T> type of setting
  * @author agueuska
  */
-public interface TcpConnect<T extends TcpConnect.Setting> extends Closeable {
+public interface TcpConnection<T extends TcpConnection.Setting> extends Closeable {
     /**
      * Empty byte buffer
      */
@@ -27,8 +27,8 @@ public interface TcpConnect<T extends TcpConnect.Setting> extends Closeable {
      * @return instance of TcpConnect
      * @throws NullPointerException any null argument
      */
-    static <T extends TcpConnect.Setting> TcpConnect<T> of(EventLoop eventLoop, T setting) {
-        return new TcpConnectImpl<>(eventLoop, setting);
+    static <T extends TcpConnection.Setting> TcpConnection<T> of(EventLoop eventLoop, T setting) {
+        return new TcpConnectionImpl<>(eventLoop, setting);
     }
 
     /**
