@@ -34,6 +34,7 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
      */
     private static final byte[] MY_SUPPORT =
             HexUtil.decode("0000001A140064313A6D6431313A75745F6D657461646174616931656565");
+
     private final byte[] infoHash;
     private final SocketAddress address;
     private final byte[] selfNodeId;
@@ -44,15 +45,17 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
     private final Duration readTimeout;
     private final int readBufferSize;
     private final int writeBufferSize;
-
-    private boolean working;
-    private Progress progress = Progress.INIT;
-    private TcpConnection<ConnectionObserver> tcpConnect;
-    private Timeout taskTimeoutHolder;
-    private Timeout ioTimeoutHolder;
     ByteBuffer readBuffer;
     ByteBuffer writeBuffer;
+    private boolean working;
+    private Progress progress = Progress.INIT;
+    private TcpConnection<ConnectionObserver> tcpConnection;
+    private Timeout taskTimeoutHolder;
+    private Timeout ioTimeoutHolder;
     private PeerPieceInfo pieceInfo;
+
+    private int peerWireLength;
+    private BiConsumer<PeerDownloadTaskImpl, byte[]> peerWireAction;
 
     PeerDownloadTaskImpl(BuilderImpl builder) {
         this.eventLoop = builder.eventLoop;
@@ -72,6 +75,33 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
         buffer.putInt(msg.length + 2).put((byte) 0x14).put(wireNum).put(msg);
     }
 
+    private void readPeerWireMessageComplete() {
+        byte[] message = new byte[peerWireLength];
+        readBuffer.flip().get(message);
+        readBuffer.compact();
+        if (message[0] == 0x14) {
+            peerWireAction.accept(this, message);
+        } else {
+            readPeerWire0x14Message(peerWireAction);
+        }
+
+    }
+
+    private void readPeerWireLengthComplete() {
+        peerWireLength = readBuffer.flip().getInt();
+        readBuffer.compact();
+        if (peerWireLength == 0) {
+            readPeerWire0x14Message(peerWireAction);
+        } else {
+            tcpConnection.read(readBuffer, peerWireLength, observer -> observer.task.readPeerWireMessageComplete());
+        }
+    }
+
+    private void readPeerWire0x14Message(BiConsumer<PeerDownloadTaskImpl, byte[]> action) {
+        peerWireAction = action;
+        tcpConnection.read(readBuffer, 4, observer -> observer.task.readPeerWireLengthComplete());
+    }
+
     private void start() {
         working = true;
         taskTimeoutHolder = eventLoop.getTimer().createTimeout(() -> this.fail("TIMEOUT"), timeout);
@@ -80,9 +110,9 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
 
     private void connect() {
         progress = Progress.CONNECT;
-        tcpConnect = TcpConnection.of(eventLoop, new ConnectionObserver(this));
+        tcpConnection = TcpConnection.of(eventLoop, new ConnectionObserver(this));
         ioTimeoutHolder = eventLoop.getTimer().createTimeout(() -> fail("CONNECT_TIMEOUT"), connectTimeout);
-        tcpConnect.connect(address, observer -> observer.task.handshake());
+        tcpConnection.connect(address, observer -> observer.task.handshake());
     }
 
     private void handshake() {
@@ -93,9 +123,8 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
         writeBuffer = ByteBuffer.allocate(writeBufferSize);
         readBuffer = ByteBuffer.allocate(readBufferSize);
         writeBuffer.put(HANDSHAKE_BYTES).put(infoHash).put(selfNodeId).flip();
-        tcpConnect.setWriteBuffer(writeBuffer);
-
-        tcpConnect.read(readBuffer, 68, observer -> observer.task.recvHandshake());
+        tcpConnection.setWriteBuffer(writeBuffer);
+        tcpConnection.read(readBuffer, 68, observer -> observer.task.recvHandshake());
     }
 
     private void recvHandshake() {
@@ -106,7 +135,7 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
         ioTimeoutHolder = eventLoop.getTimer().createTimeout(() -> fail("READ_TIMEOUT"), readTimeout);
         progress = Progress.GET_PEER_INFO;
 
-        tcpConnect.setWriteBuffer(ByteBuffer.wrap(MY_SUPPORT));
+        tcpConnection.setWriteBuffer(ByteBuffer.wrap(MY_SUPPORT));
         readPeerWire0x14Message(PeerDownloadTaskImpl::getPeerInfo);
     }
 
@@ -127,7 +156,7 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
             fail("NEGATIVE_METADATA_SIZE");
         }
         pieceInfo = new PeerPieceInfo(size.intValue(), wireNum.byteValue());
-        tcpConnect.onWriteComplete(observer -> observer.task.downloadPrice());
+        tcpConnection.onWriteComplete(observer -> observer.task.downloadPrice());
     }
 
     private void downloadPrice() {
@@ -143,7 +172,7 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
         query.put("piece", pieceInfo.getConcurrentPiece());
         byte[] queryBytes = Bencode.toBytes(query);
         writePeerWireMessage(writeBuffer.compact(), pieceInfo.getWireNum(), queryBytes);
-        tcpConnect.setWriteBuffer(writeBuffer.flip());
+        tcpConnection.setWriteBuffer(writeBuffer.flip());
 
         readPeerWire0x14Message((task, msg) -> {
             task.readBuffer.flip();
@@ -168,27 +197,6 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
         free();
     }
 
-    private void readPeerWire0x14Message(BiConsumer<PeerDownloadTaskImpl, byte[]> action) {
-        tcpConnect.read(readBuffer, 4, observer -> {
-            int length = readBuffer.flip().getInt();
-            if(length == 0){
-                readPeerWire0x14Message(action);
-            }
-            tcpConnect.read(readBuffer.compact(), length, ob -> {
-                readBuffer.flip();
-                if (readBuffer.array()[0] == 0x14) {
-                    byte[] message = new byte[length];
-                    readBuffer.get(message).compact();
-                    action.accept(ob.task, message);
-                } else {
-                    readBuffer.position(length).compact();
-                    readPeerWire0x14Message(action);
-                }
-            });
-        });
-    }
-
-
     private void fail(String reason) {
         if (!working) {
             return;
@@ -209,7 +217,7 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
     }
 
     private void free() {
-        this.tcpConnect.close();
+        this.tcpConnection.close();
         if (taskTimeoutHolder != null) {
             taskTimeoutHolder.cancel();
         }

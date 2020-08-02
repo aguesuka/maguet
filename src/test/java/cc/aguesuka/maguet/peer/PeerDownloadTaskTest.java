@@ -8,19 +8,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 public class PeerDownloadTaskTest {
-    private byte[] getRemaining(ByteBuffer buffer) {
-        int position = buffer.position();
-        int length = buffer.remaining();
-        byte[] result = new byte[length];
-        buffer.get(result);
-        buffer.position(position);
-        return result;
-    }
 
     @Test
     public void test() throws IOException {
