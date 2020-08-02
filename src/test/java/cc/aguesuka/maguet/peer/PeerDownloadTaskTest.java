@@ -1,7 +1,9 @@
 package cc.aguesuka.maguet.peer;
 
+import cc.aguesuka.maguet.util.ByteUtil;
 import cc.aguesuka.maguet.util.HexUtil;
 import cc.aguesuka.maguet.util.net.EventLoop;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -22,6 +24,7 @@ public class PeerDownloadTaskTest {
 
     @Test
     public void test() throws IOException {
+        byte[] infoHash = HexUtil.decode("A72F16876F312258E485748A56B54D77040D08A2");
         var observer = new PeerDownloadTask.Observer() {
             PeerDownloadTaskImpl task;
             EventLoop eventLoop;
@@ -31,6 +34,8 @@ public class PeerDownloadTaskTest {
             public void onCompete(byte[] metadata) {
                 eventLoop.close();
                 assert task.getProgress() == PeerDownloadTask.Progress.COMPLETE;
+                byte[] hash = ByteUtil.sha1(metadata);
+                Assert.assertArrayEquals(hash, infoHash);
             }
 
             @Override
@@ -59,30 +64,15 @@ public class PeerDownloadTaskTest {
             @Override
             public void beforeCallback() {
                 System.out.println("PeerDownloadTaskTest.beforeCallback");
-                if (task.writeBuffer != null) {
-                    byte[] bytes = getRemaining(task.writeBuffer);
-                    System.out.println("write =" + HexUtil.encode(bytes));
-                    System.out.println(new String(bytes, StandardCharsets.US_ASCII));
-                }
-
-                ByteBuffer readBuffer = task.readBuffer;
-                if (readBuffer != null) {
-                    int limit = readBuffer.limit();
-                    int position = readBuffer.position();
-                    byte[] bytes = getRemaining(readBuffer.flip());
-                    System.out.println("read = " + HexUtil.encode(bytes));
-                    System.out.println(new String(bytes, StandardCharsets.US_ASCII));
-                    readBuffer.position(position);
-                    readBuffer.limit(limit);
-                }
             }
         };
 
         EventLoop.start(eventLoop -> {
+
             PeerDownloadTask.Builder builder = PeerDownloadTask.builder()
                     .eventLoop(eventLoop)
                     .address(new InetSocketAddress("192.168.1.4", 8888))
-                    .infoHash(HexUtil.decode("A72F16876F312258E485748A56B54D77040D08A2"))
+                    .infoHash(infoHash)
                     .selfNodeId(HexUtil.decode("A72F16876F312258E485748A56B54D77040D0000"))
                     .timeout(Duration.ofSeconds(59))
                     .connectTimeout(Duration.ofSeconds(59))

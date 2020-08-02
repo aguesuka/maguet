@@ -127,7 +127,7 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
             fail("NEGATIVE_METADATA_SIZE");
         }
         pieceInfo = new PeerPieceInfo(size.intValue(), wireNum.byteValue());
-        downloadPrice();
+        tcpConnect.onWriteComplete(observer -> observer.task.downloadPrice());
     }
 
     private void downloadPrice() {
@@ -162,6 +162,7 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
             fail("CHECK");
             return;
         }
+        progress = Progress.COMPLETE;
         working = false;
         observer.onCompete(metadata);
         free();
