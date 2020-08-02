@@ -161,6 +161,7 @@ public class PeerDownloadTaskImpl implements PeerDownloadTask {
 
     private void downloadPrice() {
         progress = Progress.DOWNLOAD_METADATA;
+        ioTimeoutHolder.cancel();
         ioTimeoutHolder = eventLoop.getTimer().createTimeout(() -> fail("READ_TIMEOUT"), readTimeout);
 
         if (pieceInfo.isComplete()) {
