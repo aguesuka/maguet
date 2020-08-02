@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author :aguesuka
+ * @author aguesuka
  * 2019/12/12 21:36
  */
 public class Bencode {
@@ -77,20 +77,20 @@ public class Bencode {
 
     private static StringBuilder append(Object o, StringBuilder builder) {
         if (o instanceof Map) {
-            builder.append("{");
+            builder.append('{');
             for (Map.Entry<?, ?> entry : ((Map<?, ?>) o).entrySet()) {
-                builder.append(entry.getKey()).append("=");
+                builder.append(entry.getKey()).append('=');
                 append(entry.getValue(), builder);
                 builder.append(", ");
             }
-            builder.append("}");
+            builder.append('}');
         } else if (o instanceof List) {
-            builder.append("[");
+            builder.append('[');
             for (Object e : ((List<?>) o)) {
                 append(e, builder);
-                builder.append(",");
+                builder.append(',');
             }
-            builder.append("]");
+            builder.append(']');
         } else if (o instanceof byte[]) {
             byte[] bytes = (byte[]) o;
             for (byte b : bytes) {
