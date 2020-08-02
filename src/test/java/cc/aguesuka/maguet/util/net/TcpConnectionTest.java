@@ -115,7 +115,7 @@ public class TcpConnectionTest {
 
         @Override
         public void onClose() {
-            System.out.println("Printobserver.onClose");
+            System.out.println("PrintObserver.onClose");
             eventLoop.close();
         }
 
@@ -128,12 +128,17 @@ public class TcpConnectionTest {
 
         @Override
         public void onSelected() {
-            System.out.println("Printobserver.onSelected");
+            System.out.println("PrintObserver.onSelected");
+        }
+
+        @Override
+        public void beforeCallback() {
+            System.out.println("PrintObserver.beforeCallback");
         }
 
         @Override
         public void onEOF() {
-            System.out.println("Printobserver.onEOF");
+            System.out.println("PrintObserver.onEOF");
         }
     }
 

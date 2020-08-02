@@ -22,7 +22,7 @@ public interface TcpConnection<T extends TcpConnection.Observer> extends Closeab
      * Creates an instance of TcpConnect
      *
      * @param eventLoop EventLoop
-     * @param observer   observer
+     * @param observer  observer
      * @param <T>       type of observer
      * @return instance of TcpConnect
      * @throws NullPointerException any null argument
@@ -101,6 +101,11 @@ public interface TcpConnection<T extends TcpConnection.Observer> extends Closeab
          * Invoke when connect selected
          */
         void onSelected();
+
+        /**
+         * invokes before invokes the callback of {@link #read} or {@link #onWriteComplete}
+         */
+        void beforeCallback();
 
         /**
          * Connect will be closed when not set read buffer or write buffer if this returns true

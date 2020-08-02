@@ -127,6 +127,10 @@ public class TcpConnectionImpl<T extends TcpConnection.Observer> implements TcpC
             }
             Consumer<T> callback = state.handleSelectedEvent(this);
             while (callback != null) {
+                observer.beforeCallback();
+                if (isClosed()) {
+                    return;
+                }
                 callback.accept(observer);
                 // maybe closed by callback function
                 if (isClosed()) {
